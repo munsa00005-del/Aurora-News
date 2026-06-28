@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/pg.mjs status)",
+      "Bash(node scripts/pg.mjs start)",
+      "Bash(npx prisma *)"
+    ]
+  }
+}

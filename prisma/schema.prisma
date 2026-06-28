@@ -1,0 +1,77 @@
+// Aurora News — data model
+// DB: PostgreSQL (runs in userspace via embedded-postgres for local dev)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  content     String?  @db.Text
+  image       String?
+  source      String
+  sourceUrl   String?
+  category    String
+  slug        String   @unique
+  url         String?  @unique // canonical article URL — used for dedupe
+  dedupeKey   String   @unique // normalized title hash — secondary dedupe
+  featured    Boolean  @default(false)
+  views       Int      @default(0)
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trending    Trending?
+
+  @@index([category, publishedAt])
+  @@index([publishedAt])
+  @@index([featured])
+}
+
+model Trending {
+  id        String   @id @default(cuid())
+  newsId    String   @unique
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  score     Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([score])
+}
+
+model SyncLog {
+  id         String   @id @default(cuid())
+  category   String?
+  status     String   @default("success") // success | error | partial
+  fetched    Int      @default(0)
+  inserted   Int      @default(0)
+  duplicates Int      @default(0)
+  message    String?  @db.Text
+  durationMs Int?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // bcrypt hash
+  createdAt DateTime @default(now())
+}
+
+// Aggregated daily search terms — powers "trending searches".
+model SearchQuery {
+  id        String   @id @default(cuid())
+  term      String   @unique
+  count     Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@index([count])
+}
