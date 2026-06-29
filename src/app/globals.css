@@ -74,6 +74,83 @@ body {
   }
 }
 
+/* Full-article prose (extracted + sanitized HTML) */
+.article-body {
+  font-size: 1.125rem;
+  line-height: 1.85;
+  color: rgba(245, 245, 250, 0.82);
+}
+.article-body > * + * {
+  margin-top: 1.25rem;
+}
+.article-body h2,
+.article-body h3,
+.article-body h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  margin-top: 2rem;
+}
+.article-body h2 {
+  font-size: 1.6rem;
+}
+.article-body h3 {
+  font-size: 1.3rem;
+}
+.article-body a {
+  color: #67e8f9;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+.article-body a:hover {
+  color: #a855f7;
+}
+.article-body ul,
+.article-body ol {
+  padding-left: 1.4rem;
+}
+.article-body ul {
+  list-style: disc;
+}
+.article-body ol {
+  list-style: decimal;
+}
+.article-body li + li {
+  margin-top: 0.5rem;
+}
+.article-body blockquote {
+  border-left: 3px solid #7c3aed;
+  padding: 0.4rem 0 0.4rem 1.2rem;
+  margin-left: 0;
+  color: rgba(245, 245, 250, 0.7);
+  font-style: italic;
+  background: rgba(124, 58, 237, 0.06);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.article-body img {
+  border-radius: 0.9rem;
+  margin: 1.75rem 0;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.article-body figure {
+  margin: 1.75rem 0;
+}
+.article-body figcaption {
+  font-size: 0.85rem;
+  color: rgba(245, 245, 250, 0.45);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+.article-body strong,
+.article-body b {
+  color: #fff;
+  font-weight: 600;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

@@ -11,6 +11,8 @@ import { Clock, Eye, ArrowLeft, ExternalLink, CalendarDays } from "lucide-react"
 import { getArticleBySlug, getRelated } from "@/lib/queries";
 import { categoryAccent, categoryLabel } from "@/lib/categories";
 import { formatDate, readingTime, timeAgo, gradientFor } from "@/lib/utils";
+import { extractFullContent, isTruncated, looksLikeHtml } from "@/lib/extract";
+import { prisma } from "@/lib/db";
 import ReadingProgress from "@/components/ReadingProgress";
 import ViewTracker from "@/components/ViewTracker";
 import RelatedNews from "@/components/RelatedNews";
@@ -46,12 +48,34 @@ export default async function ArticlePage({
 
   const related = await getRelated(article, 6);
   const accent = categoryAccent(article.category);
-  const body =
+
+  // Make sure the FULL article is readable on our site. If we only have the
+  // GNews snippet, fetch + extract the original page once and cache the clean
+  // HTML back into the DB so future views are instant.
+  let contentHtml: string | null = looksLikeHtml(article.content)
+    ? article.content
+    : null;
+  if (!contentHtml && isTruncated(article.content) && article.url) {
+    const full = await extractFullContent(article.url);
+    if (full) {
+      contentHtml = full;
+      await prisma.news
+        .update({ where: { id: article.id }, data: { content: full } })
+        .catch(() => {});
+    }
+  }
+
+  // Fallback when extraction isn't possible: render whatever plain text we have.
+  const fallbackText =
     article.content?.replace(/\[\+\d+\s*chars\]$/i, "").trim() ||
     article.description ||
     "";
-  const paragraphs = body.split(/\n+/).filter(Boolean);
-  const mins = readingTime(body || article.description);
+  const fallbackParagraphs = fallbackText.split(/\n+/).filter(Boolean);
+  const mins = readingTime(
+    contentHtml
+      ? contentHtml.replace(/<[^>]+>/g, " ")
+      : fallbackText || article.description
+  );
 
   return (
     <article className="relative pb-10">
@@ -116,24 +140,31 @@ export default async function ArticlePage({
           <span className="ml-auto text-white/40">{timeAgo(article.publishedAt)}</span>
         </div>
 
-        <div className="mt-8 space-y-5 text-lg leading-relaxed text-white/80">
-          {paragraphs.length ? (
-            paragraphs.map((p, i) => <p key={i}>{p}</p>)
-          ) : (
-            <p className="text-white/50">
-              Full content for this story is available at the original source.
-            </p>
-          )}
-        </div>
+        {contentHtml ? (
+          <div
+            className="article-body mt-8"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
+        ) : (
+          <div className="mt-8 space-y-5 text-lg leading-relaxed text-white/80">
+            {fallbackParagraphs.length ? (
+              fallbackParagraphs.map((p, i) => <p key={i}>{p}</p>)
+            ) : (
+              <p className="text-white/50">
+                Full content for this story is available at the original source.
+              </p>
+            )}
+          </div>
+        )}
 
         {article.url && (
           <a
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-medium text-white transition hover:border-white/30"
+            className="mt-10 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/30 hover:text-white"
           >
-            Read full story at {article.source}
+            View original at {article.source}
             <ExternalLink className="h-4 w-4" />
           </a>
         )}
