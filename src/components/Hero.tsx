@@ -10,7 +10,7 @@
 import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Search, Sparkles, ChevronDown } from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 import { useUI } from "@/lib/store";
 
 // Globe is heavy (three.js) → load only on the client, after paint.
@@ -51,16 +51,6 @@ export default function Hero() {
         style={{ y, opacity, scale }}
         className="relative z-10 mx-auto flex max-w-3xl flex-col items-center text-center"
       >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="glass mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/70"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-amber" />
-          AI-curated · updates every 6 hours · 10 categories
-        </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
