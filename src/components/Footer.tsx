@@ -65,6 +65,12 @@ export default function Footer() {
           <span>© {year} Aurora News. Crafted in the dark.</span>
           <span>Updated automatically every 6 hours.</span>
         </div>
+
+        <div className="mt-6 text-center">
+          <span className="text-sm font-medium tracking-wide">
+            Made by : <span className="aurora-text font-display font-bold">NITESH KUMAR</span>
+          </span>
+        </div>
       </div>
     </footer>
   );
