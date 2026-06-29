@@ -19,6 +19,7 @@ model News {
   source      String
   sourceUrl   String?
   category    String
+  language    String   @default("en") // "en" | "hi"
   slug        String   @unique
   url         String?  @unique // canonical article URL — used for dedupe
   dedupeKey   String   @unique // normalized title hash — secondary dedupe
@@ -31,6 +32,8 @@ model News {
   trending    Trending?
 
   @@index([category, publishedAt])
+  @@index([language, publishedAt])
+  @@index([language, category, publishedAt])
   @@index([publishedAt])
   @@index([featured])
 }

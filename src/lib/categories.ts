@@ -21,7 +21,8 @@ export interface CategoryConfig {
   limit: number;
   weight: number;
   accent: string; // hex used for glows / chips
-  query: string; // GNews query
+  query: string; // GNews query (English)
+  queryHi?: string; // GNews query (Hindi) for search-based categories
   topic?: string; // GNews topic when available
 }
 
@@ -29,10 +30,10 @@ export const CATEGORIES: CategoryConfig[] = [
   { slug: "india", label: "India", limit: 20, weight: 1.25, accent: "#F59E0B", query: "India", topic: "nation" },
   { slug: "world", label: "World", limit: 10, weight: 1.15, accent: "#06B6D4", query: "world", topic: "world" },
   { slug: "sports", label: "Sports", limit: 8, weight: 0.95, accent: "#22C55E", query: "sports", topic: "sports" },
-  { slug: "ai", label: "AI", limit: 8, weight: 1.3, accent: "#A855F7", query: "artificial intelligence" },
+  { slug: "ai", label: "AI", limit: 8, weight: 1.3, accent: "#A855F7", query: "artificial intelligence", queryHi: "आर्टिफिशियल इंटेलिजेंस" },
   { slug: "technology", label: "Technology", limit: 8, weight: 1.2, accent: "#7C3AED", query: "technology", topic: "technology" },
   { slug: "economy", label: "Economy", limit: 8, weight: 1.1, accent: "#F59E0B", query: "economy business", topic: "business" },
-  { slug: "crime", label: "Crime", limit: 8, weight: 0.9, accent: "#DC2626", query: "crime" },
+  { slug: "crime", label: "Crime", limit: 8, weight: 0.9, accent: "#DC2626", query: "crime", queryHi: "अपराध" },
   { slug: "entertainment", label: "Entertainment", limit: 8, weight: 0.85, accent: "#EC4899", query: "entertainment", topic: "entertainment" },
   { slug: "science", label: "Science", limit: 7, weight: 1.05, accent: "#06B6D4", query: "science", topic: "science" },
   { slug: "health", label: "Health", limit: 7, weight: 1.0, accent: "#10B981", query: "health", topic: "health" },

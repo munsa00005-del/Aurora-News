@@ -3,10 +3,12 @@
 // filter chips are links that re-run the search.
 
 import Link from "next/link";
+import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import { Search as SearchIcon } from "lucide-react";
 import { searchArticles } from "@/lib/queries";
 import { CATEGORIES, getCategory } from "@/lib/categories";
+import { normalizeLang, LANG_COOKIE, makeT, catLabel } from "@/lib/i18n";
 import InfiniteFeed from "@/components/InfiniteFeed";
 
 export const dynamic = "force-dynamic";
@@ -31,11 +33,14 @@ export default async function SearchPage({
       ? searchParams.category.toLowerCase()
       : "";
 
+  const lang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
+  const t = makeT(lang);
+
   const { items, nextCursor } = q
-    ? await searchArticles(q, { category, limit: 18 })
+    ? await searchArticles(q, { category, limit: 18, lang })
     : { items: [], nextCursor: null };
 
-  const endpointParams = new URLSearchParams({ q });
+  const endpointParams = new URLSearchParams({ q, lang });
   if (category) endpointParams.set("category", category);
 
   function chipHref(slug: string) {
@@ -47,7 +52,7 @@ export default async function SearchPage({
   return (
     <div className="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 sm:pt-32">
       <div className="mb-3 inline-flex items-center gap-2 text-sm text-white/50">
-        <SearchIcon className="h-4 w-4" /> Search results
+        <SearchIcon className="h-4 w-4" /> {t("search.results")}
       </div>
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-5xl">
         {q ? (
@@ -55,14 +60,14 @@ export default async function SearchPage({
             “<span className="text-gradient">{q}</span>”
           </>
         ) : (
-          "Search Aurora News"
+          t("search.title")
         )}
       </h1>
       {q && (
         <p className="mt-2 text-white/55">
           {items.length === 0
-            ? "No matching stories found."
-            : `Showing top matches${category ? ` in ${category}` : ""}.`}
+            ? t("search.none")
+            : `${t("search.showing")}${category ? ` · ${catLabel(lang, category)}` : ""}.`}
         </p>
       )}
 
@@ -70,11 +75,11 @@ export default async function SearchPage({
       {q && (
         <div className="no-scrollbar mt-6 flex gap-2 overflow-x-auto pb-2">
           <Chip href={chipHref("")} active={!category}>
-            All
+            {t("search.all")}
           </Chip>
           {CATEGORIES.map((c) => (
             <Chip key={c.slug} href={chipHref(c.slug)} active={category === c.slug}>
-              {c.label}
+              {catLabel(lang, c.slug)}
             </Chip>
           ))}
         </div>
@@ -83,15 +88,16 @@ export default async function SearchPage({
       <div className="mt-8">
         {q ? (
           <InfiniteFeed
-            key={`${q}-${category}`}
+            key={`${q}-${category}-${lang}`}
             endpoint={`/api/search?${endpointParams}`}
             initial={items}
             initialCursor={nextCursor}
-            emptyLabel="No matching stories — try a different term."
+            emptyLabel={t("search.none")}
+            endLabel={t("feed.end")}
           />
         ) : (
           <p className="glass rounded-2xl px-6 py-16 text-center text-white/50">
-            Type a query in the search bar (⌘K) to explore the archive.
+            {t("hero.searchPlaceholder")}
           </p>
         )}
       </div>

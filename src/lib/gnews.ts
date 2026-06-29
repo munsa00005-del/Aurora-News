@@ -28,24 +28,26 @@ export function hasApiKey(): boolean {
 // the category maps to a GNews topic, otherwise the `search` endpoint.
 export async function fetchCategory(
   cat: CategoryConfig,
-  max = 10
+  max = 10,
+  lang: "en" | "hi" = "en"
 ): Promise<GNewsArticle[]> {
   const key = process.env.GNEWS_API_KEY;
   if (!key) throw new Error("GNEWS_API_KEY not set");
 
   const params = new URLSearchParams({
     apikey: key,
-    lang: "en",
+    lang,
     max: String(Math.min(max, 25)),
   });
 
   let endpoint: string;
   if (cat.topic) {
     params.set("topic", cat.topic);
-    if (cat.slug === "india") params.set("country", "in");
+    // India uses the IN edition; Hindi headlines are also best scoped to India.
+    if (cat.slug === "india" || lang === "hi") params.set("country", "in");
     endpoint = `${BASE}/top-headlines?${params.toString()}`;
   } else {
-    params.set("q", cat.query);
+    params.set("q", lang === "hi" ? cat.queryHi || cat.query : cat.query);
     params.set("sortby", "publishedAt");
     endpoint = `${BASE}/search?${params.toString()}`;
   }

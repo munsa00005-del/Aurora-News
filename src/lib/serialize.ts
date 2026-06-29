@@ -15,6 +15,7 @@ export function serializeArticle(n: NewsWithTrending): Article {
     source: n.source,
     sourceUrl: n.sourceUrl,
     category: n.category,
+    language: n.language,
     slug: n.slug,
     url: n.url,
     featured: n.featured,

@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import AuroraBackground from "@/components/AuroraBackground";
 import Navbar from "@/components/Navbar";
 import SearchOverlay from "@/components/SearchOverlay";
 import Footer from "@/components/Footer";
+import { LangProvider } from "@/components/LangProvider";
+import { normalizeLang, LANG_COOKIE } from "@/lib/i18n";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -57,14 +60,17 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const lang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang={lang} className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen antialiased">
-        <AuroraBackground />
-        <Navbar />
-        <SearchOverlay />
-        <main className="relative z-10">{children}</main>
-        <Footer />
+        <LangProvider initial={lang}>
+          <AuroraBackground />
+          <Navbar />
+          <SearchOverlay />
+          <main className="relative z-10">{children}</main>
+          <Footer lang={lang} />
+        </LangProvider>
       </body>
     </html>
   );

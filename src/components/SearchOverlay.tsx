@@ -13,7 +13,9 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, X, TrendingUp, Clock, ArrowRight, Hash } from "lucide-react";
 import { useUI } from "@/lib/store";
+import { useLang } from "./LangProvider";
 import { CATEGORIES } from "@/lib/categories";
+import { catLabel } from "@/lib/i18n";
 import type { Article } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 
@@ -35,7 +37,8 @@ function pushHistory(term: string) {
 }
 
 export default function SearchOverlay() {
-  const { searchOpen, closeSearch, openSearch, toggleSearch } = useUI();
+  const { searchOpen, closeSearch, toggleSearch } = useUI();
+  const { lang, t } = useLang();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -80,7 +83,7 @@ export default function SearchOverlay() {
     }
     setLoading(true);
     const id = setTimeout(() => {
-      const params = new URLSearchParams({ q, mode: "suggest" });
+      const params = new URLSearchParams({ q, mode: "suggest", lang });
       fetch(`/api/search?${params}`)
         .then((r) => r.json())
         .then((d) => setSuggestions(d.items || []))
@@ -132,7 +135,7 @@ export default function SearchOverlay() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
-                placeholder="Search the future of news…"
+                placeholder={t("search.placeholder")}
                 className="w-full bg-transparent text-lg text-white placeholder-white/35 outline-none"
               />
               {loading && (
@@ -149,7 +152,7 @@ export default function SearchOverlay() {
             {/* Category filter chips */}
             <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-white/5 px-5 py-3">
               <Chip active={category === ""} onClick={() => setCategory("")}>
-                All
+                {t("search.all")}
               </Chip>
               {CATEGORIES.map((c) => (
                 <Chip
@@ -158,7 +161,7 @@ export default function SearchOverlay() {
                   accent={c.accent}
                   onClick={() => setCategory(c.slug)}
                 >
-                  {c.label}
+                  {catLabel(lang, c.slug)}
                 </Chip>
               ))}
             </div>
@@ -181,7 +184,7 @@ export default function SearchOverlay() {
                               {a.title}
                             </span>
                             <span className="shrink-0 text-[11px] uppercase tracking-wide text-white/35">
-                              {a.category} · {timeAgo(a.publishedAt)}
+                              {catLabel(lang, a.category)} · {timeAgo(a.publishedAt)}
                             </span>
                           </Link>
                         </li>
@@ -190,7 +193,7 @@ export default function SearchOverlay() {
                   ) : (
                     !loading && (
                       <p className="px-3 py-6 text-center text-sm text-white/40">
-                        No quick matches — press Enter for a full search.
+                        {t("search.noQuick")}
                       </p>
                     )
                   )}
@@ -199,8 +202,8 @@ export default function SearchOverlay() {
                     className="mt-2 flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-purple/20 to-cyan/20 px-4 py-3 text-sm font-medium text-white transition hover:from-purple/30 hover:to-cyan/30"
                   >
                     <span>
-                      See all results for “{q.trim()}”
-                      {category ? ` in ${category}` : ""}
+                      {t("search.seeAll")} “{q.trim()}”
+                      {category ? ` · ${catLabel(lang, category)}` : ""}
                     </span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
@@ -208,7 +211,7 @@ export default function SearchOverlay() {
               ) : (
                 <div className="space-y-5 p-2">
                   {history.length > 0 && (
-                    <Section icon={<Clock className="h-3.5 w-3.5" />} label="Recent">
+                    <Section icon={<Clock className="h-3.5 w-3.5" />} label={t("search.recent")}>
                       {history.map((h) => (
                         <Pill key={h} onClick={() => submit(h)}>
                           {h}
@@ -218,12 +221,12 @@ export default function SearchOverlay() {
                   )}
                   <Section
                     icon={<TrendingUp className="h-3.5 w-3.5" />}
-                    label="Trending searches"
+                    label={t("search.trending")}
                   >
-                    {trending.map((t) => (
-                      <Pill key={t} onClick={() => submit(t)}>
+                    {trending.map((term) => (
+                      <Pill key={term} onClick={() => submit(term)}>
                         <Hash className="h-3 w-3 opacity-50" />
-                        {t}
+                        {term}
                       </Pill>
                     ))}
                   </Section>

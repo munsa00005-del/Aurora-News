@@ -12,6 +12,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Search, ChevronDown } from "lucide-react";
 import { useUI } from "@/lib/store";
+import { useLang } from "./LangProvider";
 
 // Globe is heavy (three.js) → load only on the client, after paint.
 const Globe = dynamic(() => import("./Globe"), {
@@ -21,6 +22,7 @@ const Globe = dynamic(() => import("./Globe"), {
 
 export default function Hero() {
   const { openSearch } = useUI();
+  const { t } = useLang();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -57,9 +59,9 @@ export default function Hero() {
           transition={{ delay: 0.32, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl"
         >
-          The world,
+          {t("hero.tagline1")}
           <br />
-          <span className="aurora-text">rendered in light.</span>
+          <span className="aurora-text">{t("hero.tagline2")}</span>
         </motion.h1>
 
         <motion.p
@@ -68,8 +70,7 @@ export default function Hero() {
           transition={{ delay: 0.46, duration: 0.6 }}
           className="mt-6 max-w-xl text-balance text-base text-white/60 sm:text-lg"
         >
-          A living feed of what matters — India to orbit, markets to machines.
-          Trending stories from every corner, continuously synced.
+          {t("hero.subtitle")}
         </motion.p>
 
         {/* search bar */}
@@ -82,7 +83,7 @@ export default function Hero() {
         >
           <Search className="h-5 w-5 text-white/50 transition group-hover:text-cyan" />
           <span className="flex-1 text-white/45">
-            Search breaking stories, topics, sources…
+            {t("hero.searchPlaceholder")}
           </span>
           <kbd className="hidden rounded border border-white/15 px-2 py-0.5 text-[11px] text-white/40 sm:block">
             ⌘K
@@ -96,7 +97,7 @@ export default function Hero() {
         className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2"
       >
         <div className="flex flex-col items-center gap-2 text-white/40">
-          <span className="text-[10px] uppercase tracking-[0.3em]">Trending</span>
+          <span className="text-[10px] uppercase tracking-[0.3em]">{t("hero.scroll")}</span>
           <ChevronDown className="h-5 w-5 animate-bounce" />
         </div>
       </motion.div>

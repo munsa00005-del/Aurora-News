@@ -4,12 +4,14 @@
 //   • related-news recommendations
 
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Clock, Eye, ArrowLeft, ExternalLink, CalendarDays } from "lucide-react";
 import { getArticleBySlug, getRelated } from "@/lib/queries";
-import { categoryAccent, categoryLabel } from "@/lib/categories";
+import { categoryAccent } from "@/lib/categories";
+import { normalizeLang, LANG_COOKIE, makeT, catLabel } from "@/lib/i18n";
 import { formatDate, readingTime, timeAgo, gradientFor } from "@/lib/utils";
 import { extractFullContent, isTruncated, looksLikeHtml } from "@/lib/extract";
 import { prisma } from "@/lib/db";
@@ -48,6 +50,8 @@ export default async function ArticlePage({
 
   const related = await getRelated(article, 6);
   const accent = categoryAccent(article.category);
+  const uiLang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
+  const t = makeT(uiLang);
 
   // Make sure the FULL article is readable on our site. If we only have the
   // GNews snippet, fetch + extract the original page once and cache the clean
@@ -108,7 +112,7 @@ export default async function ArticlePage({
               className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-md"
               style={{ borderColor: `${accent}66`, background: `${accent}22` }}
             >
-              {categoryLabel(article.category)}
+              {catLabel(uiLang, article.category)}
             </Link>
             <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
               {article.title}
@@ -123,7 +127,7 @@ export default async function ArticlePage({
           href="/"
           className="mt-6 inline-flex items-center gap-1.5 text-sm text-white/50 transition hover:text-white"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to feed
+          <ArrowLeft className="h-4 w-4" /> {t("article.back")}
         </Link>
 
         <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-white/10 py-4 text-sm text-white/55">
@@ -132,10 +136,10 @@ export default async function ArticlePage({
             <CalendarDays className="h-4 w-4" /> {formatDate(article.publishedAt)}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="h-4 w-4" /> {mins} min read
+            <Clock className="h-4 w-4" /> {mins} {t("article.minRead")}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <Eye className="h-4 w-4" /> {article.views.toLocaleString()} views
+            <Eye className="h-4 w-4" /> {article.views.toLocaleString()} {t("article.views")}
           </span>
           <span className="ml-auto text-white/40">{timeAgo(article.publishedAt)}</span>
         </div>
@@ -164,14 +168,14 @@ export default async function ArticlePage({
             rel="noopener noreferrer"
             className="mt-10 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/30 hover:text-white"
           >
-            View original at {article.source}
+            {t("article.viewOriginal", { source: article.source })}
             <ExternalLink className="h-4 w-4" />
           </a>
         )}
 
       </div>
 
-      <RelatedNews items={related} />
+      <RelatedNews items={related} lang={uiLang} />
     </article>
   );
 }

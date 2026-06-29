@@ -14,7 +14,8 @@ export async function GET(
   }
   const { searchParams } = new URL(req.url);
   const cursor = searchParams.get("cursor");
+  const lang = searchParams.get("lang") === "hi" ? "hi" : "en";
   const limit = Math.min(Number(searchParams.get("limit")) || cat.limit, 40);
-  const data = await getByCategory(cat.slug, limit, cursor);
+  const data = await getByCategory(cat.slug, limit, cursor, lang);
   return NextResponse.json(data);
 }

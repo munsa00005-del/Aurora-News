@@ -11,7 +11,9 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Article } from "@/lib/types";
-import { categoryAccent, categoryLabel } from "@/lib/categories";
+import { categoryAccent } from "@/lib/categories";
+import { catLabel } from "@/lib/i18n";
+import { useLang } from "./LangProvider";
 import { timeAgo, gradientFor } from "@/lib/utils";
 
 export default function NewsCard({
@@ -26,6 +28,7 @@ export default function NewsCard({
   const ref = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 50 });
   const accent = categoryAccent(article.category);
+  const { lang } = useLang();
 
   function onMove(e: React.MouseEvent) {
     const el = ref.current;
@@ -100,7 +103,7 @@ export default function NewsCard({
                 background: `${accent}22`,
               }}
             >
-              {categoryLabel(article.category)}
+              {catLabel(lang, article.category)}
             </span>
           </div>
 

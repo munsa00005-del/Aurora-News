@@ -9,6 +9,7 @@ export interface Article {
   source: string;
   sourceUrl: string | null;
   category: string;
+  language: string;
   slug: string;
   url: string | null;
   featured: boolean;

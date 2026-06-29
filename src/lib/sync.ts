@@ -31,8 +31,8 @@ function normalizeTitle(title: string): string {
     .trim();
 }
 
-function dedupeKeyFor(a: GNewsArticle): string {
-  return `k_${hash(normalizeTitle(a.title)).toString(36)}`;
+function dedupeKeyFor(a: GNewsArticle, lang: string): string {
+  return `k_${lang}_${hash(normalizeTitle(a.title)).toString(36)}`;
 }
 
 interface CategorySyncResult {
@@ -43,21 +43,24 @@ interface CategorySyncResult {
   error?: string;
 }
 
-async function syncCategory(cat: CategoryConfig): Promise<CategorySyncResult> {
+async function syncCategory(
+  cat: CategoryConfig,
+  lang: "en" | "hi" = "en"
+): Promise<CategorySyncResult> {
   const start = Date.now();
   let fetched = 0;
   let inserted = 0;
   let duplicates = 0;
 
   try {
-    const articles = await fetchCategory(cat, Math.max(cat.limit + 4, 10));
+    const articles = await fetchCategory(cat, Math.max(cat.limit + 4, 10), lang);
     fetched = articles.length;
 
     // De-dupe within the batch first.
     const seen = new Set<string>();
     for (const a of articles) {
       if (!a.title || !a.url) continue;
-      const key = dedupeKeyFor(a);
+      const key = dedupeKeyFor(a, lang);
       if (seen.has(key)) continue;
       seen.add(key);
 
@@ -74,6 +77,7 @@ async function syncCategory(cat: CategoryConfig): Promise<CategorySyncResult> {
         source: a.source?.name?.slice(0, 200) || "Unknown",
         sourceUrl: a.source?.url ?? null,
         category: cat.slug,
+        language: lang,
         url: a.url,
         dedupeKey: key,
         publishedAt: new Date(a.publishedAt || Date.now()),
@@ -100,7 +104,7 @@ async function syncCategory(cat: CategoryConfig): Promise<CategorySyncResult> {
 
     await prisma.syncLog.create({
       data: {
-        category: cat.slug,
+        category: `${cat.slug}:${lang}`,
         status: "success",
         fetched,
         inserted,
@@ -109,12 +113,12 @@ async function syncCategory(cat: CategoryConfig): Promise<CategorySyncResult> {
       },
     });
 
-    return { category: cat.slug, fetched, inserted, duplicates };
+    return { category: `${cat.slug}:${lang}`, fetched, inserted, duplicates };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     await prisma.syncLog.create({
       data: {
-        category: cat.slug,
+        category: `${cat.slug}:${lang}`,
         status: "error",
         fetched,
         inserted,
@@ -123,7 +127,7 @@ async function syncCategory(cat: CategoryConfig): Promise<CategorySyncResult> {
         durationMs: Date.now() - start,
       },
     });
-    return { category: cat.slug, fetched, inserted, duplicates, error: message };
+    return { category: `${cat.slug}:${lang}`, fetched, inserted, duplicates, error: message };
   }
 }
 
@@ -201,12 +205,19 @@ export async function syncAll(): Promise<SyncSummary> {
 
   running = true;
   const perCategory: CategorySyncResult[] = [];
+  // Languages to pull. Override with SYNC_LANGS="en" to save GNews quota.
+  const langs = (process.env.SYNC_LANGS || "en,hi")
+    .split(",")
+    .map((l) => l.trim())
+    .filter((l): l is "en" | "hi" => l === "en" || l === "hi");
   try {
     // Sequential to respect GNews free-tier rate limits.
-    for (const cat of CATEGORIES) {
-      const r = await syncCategory(cat);
-      perCategory.push(r);
-      await new Promise((res) => setTimeout(res, 1100));
+    for (const lang of langs) {
+      for (const cat of CATEGORIES) {
+        const r = await syncCategory(cat, lang);
+        perCategory.push(r);
+        await new Promise((res) => setTimeout(res, 1100));
+      }
     }
 
     const scored = await recomputeTrending();

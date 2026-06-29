@@ -28,11 +28,13 @@ function decodeCursor(c: string | null | undefined): [string, string] | null {
  */
 export async function getTrending(
   limit = 18,
-  cursor?: string | null
+  cursor?: string | null,
+  lang: string = "en"
 ): Promise<Paginated<Article>> {
   const dec = decodeCursor(cursor);
   const where = dec
     ? {
+        language: lang,
         trending: {
           OR: [
             { score: { lt: Number(dec[0]) } },
@@ -40,7 +42,7 @@ export async function getTrending(
           ],
         },
       }
-    : { trending: { isNot: null } };
+    : { language: lang, trending: { isNot: null } };
 
   const rows = await prisma.news.findMany({
     where,
@@ -61,8 +63,9 @@ export async function getTrending(
 }
 
 /** Lightweight list for the breaking-news ticker. */
-export async function getTicker(limit = 12): Promise<Article[]> {
+export async function getTicker(limit = 12, lang: string = "en"): Promise<Article[]> {
   const rows = await prisma.news.findMany({
+    where: { language: lang },
     include: TRENDING_INCLUDE,
     orderBy: [{ trending: { score: "desc" } }, { publishedAt: "desc" }],
     take: limit,
@@ -98,10 +101,14 @@ export async function getFeatured(limit = 5): Promise<Article[]> {
 export async function getByCategory(
   slug: string,
   limit: number,
-  cursor?: string | null
+  cursor?: string | null,
+  lang: string = "en"
 ): Promise<Paginated<Article>> {
   const dec = decodeCursor(cursor);
-  const where: Record<string, unknown> = { category: slug.toLowerCase() };
+  const where: Record<string, unknown> = {
+    category: slug.toLowerCase(),
+    language: lang,
+  };
   if (dec) {
     const iso = dec[0];
     where.OR = [
@@ -142,7 +149,11 @@ export async function getRelated(
   limit = 6
 ): Promise<Article[]> {
   const sameCat = await prisma.news.findMany({
-    where: { category: article.category, id: { not: article.id } },
+    where: {
+      category: article.category,
+      language: article.language,
+      id: { not: article.id },
+    },
     include: TRENDING_INCLUDE,
     orderBy: [{ trending: { score: "desc" } }, { publishedAt: "desc" }],
     take: limit,
@@ -151,7 +162,7 @@ export async function getRelated(
 
   const ids = [article.id, ...sameCat.map((r) => r.id)];
   const fill = await prisma.news.findMany({
-    where: { id: { notIn: ids } },
+    where: { id: { notIn: ids }, language: article.language },
     include: TRENDING_INCLUDE,
     orderBy: [{ trending: { score: "desc" } }],
     take: limit - sameCat.length,
@@ -162,7 +173,12 @@ export async function getRelated(
 /** Full-text-ish search over title/description/source, optional category. */
 export async function searchArticles(
   q: string,
-  opts: { category?: string; limit?: number; cursor?: string | null } = {}
+  opts: {
+    category?: string;
+    limit?: number;
+    cursor?: string | null;
+    lang?: string;
+  } = {}
 ): Promise<Paginated<Article>> {
   const limit = opts.limit ?? 18;
   const term = q.trim();
@@ -171,6 +187,7 @@ export async function searchArticles(
   const dec = decodeCursor(opts.cursor);
   const where: Record<string, unknown> = {
     AND: [
+      { language: opts.lang ?? "en" },
       {
         OR: [
           { title: { contains: term, mode: "insensitive" } },
@@ -211,11 +228,15 @@ export async function searchArticles(
 }
 
 /** Lightweight autosuggestions (titles) for the search box. */
-export async function suggest(q: string, limit = 6): Promise<Article[]> {
+export async function suggest(
+  q: string,
+  limit = 6,
+  lang: string = "en"
+): Promise<Article[]> {
   const term = q.trim();
   if (!term) return [];
   const rows = await prisma.news.findMany({
-    where: { title: { contains: term, mode: "insensitive" } },
+    where: { title: { contains: term, mode: "insensitive" }, language: lang },
     include: TRENDING_INCLUDE,
     orderBy: [{ trending: { score: "desc" } }, { publishedAt: "desc" }],
     take: limit,

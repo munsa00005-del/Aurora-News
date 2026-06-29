@@ -13,11 +13,13 @@ export default function InfiniteFeed({
   initial,
   initialCursor,
   emptyLabel = "No articles yet — the next sync will fill this in.",
+  endLabel = "You’ve reached the edge of the aurora ✦",
 }: {
   endpoint: string; // e.g. "/api/trending" or "/api/category/india"
   initial: Article[];
   initialCursor: string | null;
   emptyLabel?: string;
+  endLabel?: string;
 }) {
   const [items, setItems] = useState<Article[]>(initial);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
@@ -79,9 +81,7 @@ export default function InfiniteFeed({
       <div ref={sentinel} className="h-12" />
 
       {done && (
-        <p className="py-10 text-center text-sm text-white/35">
-          You’ve reached the edge of the aurora ✦
-        </p>
+        <p className="py-10 text-center text-sm text-white/35">{endLabel}</p>
       )}
     </>
   );

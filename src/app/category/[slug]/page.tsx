@@ -3,9 +3,11 @@
 // scrolling loads more via the same /api/category endpoint.
 
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import { getByCategory } from "@/lib/queries";
 import { getCategory, CATEGORIES } from "@/lib/categories";
+import { normalizeLang, LANG_COOKIE, makeT, catLabel } from "@/lib/i18n";
 import InfiniteFeed from "@/components/InfiniteFeed";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -36,7 +38,10 @@ export default async function CategoryPage({
   const cat = getCategory(params.slug);
   if (!cat) notFound();
 
-  const { items, nextCursor } = await getByCategory(cat.slug, cat.limit);
+  const lang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
+  const t = makeT(lang);
+  const label = catLabel(lang, cat.slug);
+  const { items, nextCursor } = await getByCategory(cat.slug, cat.limit, null, lang);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 sm:pt-32">
@@ -49,7 +54,7 @@ export default async function CategoryPage({
             className="h-1.5 w-1.5 rounded-full"
             style={{ background: cat.accent }}
           />
-          Category
+          {t("category.badge")}
         </div>
         <h1 className="font-display text-4xl font-bold tracking-tight sm:text-6xl">
           <span
@@ -60,19 +65,21 @@ export default async function CategoryPage({
               WebkitTextFillColor: "transparent",
             }}
           >
-            {cat.label}
+            {label}
           </span>
         </h1>
         <p className="mt-3 max-w-xl text-white/55">
-          The latest {cat.label} stories, ranked and continuously updated.
+          {t("category.subtitle", { label })}
         </p>
       </ScrollReveal>
 
       <InfiniteFeed
-        endpoint={`/api/category/${cat.slug}`}
+        key={lang}
+        endpoint={`/api/category/${cat.slug}?lang=${lang}`}
         initial={items}
         initialCursor={nextCursor}
-        emptyLabel={`No ${cat.label} articles yet — the next sync will fill this in.`}
+        emptyLabel={t("feed.empty")}
+        endLabel={t("feed.end")}
       />
     </div>
   );

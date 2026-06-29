@@ -10,21 +10,28 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, Menu, X, Command } from "lucide-react";
 import Logo from "./Logo";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useUI } from "@/lib/store";
+import { useLang } from "./LangProvider";
 import { CATEGORIES } from "@/lib/categories";
+import { catLabel, Lang } from "@/lib/i18n";
 
-const NAV = [
-  { slug: "", label: "Home", href: "/" },
+const NAV_ITEMS = [
+  { slug: "", href: "/", accent: undefined as string | undefined },
   ...CATEGORIES.map((c) => ({
     slug: c.slug,
-    label: c.label,
     href: `/category/${c.slug}`,
-    accent: c.accent,
+    accent: c.accent as string | undefined,
   })),
 ];
 
+function navLabel(lang: Lang, slug: string, t: (k: string) => string) {
+  return slug === "" ? t("nav.home") : catLabel(lang, slug);
+}
+
 export default function Navbar() {
   const { openSearch } = useUI();
+  const { lang, t } = useLang();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [drawer, setDrawer] = useState(false);
@@ -57,10 +64,12 @@ export default function Navbar() {
 
           {/* Desktop category links */}
           <div className="no-scrollbar ml-2 hidden flex-1 items-center gap-0.5 overflow-x-auto py-1 lg:flex">
-            {NAV.map((item, i) => (
+            {NAV_ITEMS.map((item, i) => (
               <NavLink
                 key={item.href}
-                item={item}
+                href={item.href}
+                label={navLabel(lang, item.slug, t)}
+                accent={item.accent}
                 active={isActive(item.href)}
                 index={i}
               />
@@ -68,12 +77,13 @@ export default function Navbar() {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <LanguageSwitcher />
             <button
               onClick={openSearch}
               className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/60 transition hover:border-white/25 hover:text-white"
             >
               <Search className="h-4 w-4" />
-              <span className="hidden sm:inline">Search</span>
+              <span className="hidden sm:inline">{t("nav.search")}</span>
               <kbd className="hidden items-center gap-0.5 rounded border border-white/15 px-1 text-[10px] text-white/40 sm:flex">
                 <Command className="h-2.5 w-2.5" />K
               </kbd>
@@ -120,10 +130,12 @@ export default function Navbar() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              {NAV.map((item, i) => (
+              {NAV_ITEMS.map((item, i) => (
                 <MobileNavLink
                   key={item.href}
-                  item={item}
+                  href={item.href}
+                  label={navLabel(lang, item.slug, t)}
+                  accent={item.accent}
                   active={isActive(item.href)}
                   index={i}
                 />
@@ -136,20 +148,18 @@ export default function Navbar() {
   );
 }
 
-type NavItem = { slug: string; label: string; href: string; accent?: string };
+type NavLinkProps = {
+  href: string;
+  label: string;
+  accent?: string;
+  active: boolean;
+  index: number;
+};
 
 // Animated, accent-coloured desktop nav pill: glowing dot, hover glow,
 // gradient underline, and a colour-morphing active background.
-function NavLink({
-  item,
-  active,
-  index,
-}: {
-  item: NavItem;
-  active: boolean;
-  index: number;
-}) {
-  const accent = item.accent || "#A855F7";
+function NavLink({ href, label, accent: accentProp, active, index }: NavLinkProps) {
+  const accent = accentProp || "#A855F7";
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -157,7 +167,7 @@ function NavLink({
       transition={{ delay: 0.05 + index * 0.035, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
       <Link
-        href={item.href}
+        href={href}
         className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition-transform duration-200 hover:-translate-y-0.5"
       >
         {/* hover glow halo */}
@@ -186,7 +196,7 @@ function NavLink({
           style={{ background: accent, boxShadow: `0 0 8px ${accent}` }}
         />
         <span className={active ? "text-white" : "text-white/60 transition-colors group-hover:text-white"}>
-          {item.label}
+          {label}
         </span>
         {/* animated gradient underline */}
         <span
@@ -199,16 +209,8 @@ function NavLink({
 }
 
 // Mobile drawer link: staggered slide-in with an accent dot + accent hover bar.
-function MobileNavLink({
-  item,
-  active,
-  index,
-}: {
-  item: NavItem;
-  active: boolean;
-  index: number;
-}) {
-  const accent = item.accent || "#A855F7";
+function MobileNavLink({ href, label, accent: accentProp, active, index }: NavLinkProps) {
+  const accent = accentProp || "#A855F7";
   return (
     <motion.div
       initial={{ opacity: 0, x: 24 }}
@@ -216,7 +218,7 @@ function MobileNavLink({
       transition={{ delay: 0.06 + index * 0.04, duration: 0.35 }}
     >
       <Link
-        href={item.href}
+        href={href}
         className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-4 py-2.5 text-sm transition ${
           active ? "text-white" : "text-white/65 hover:text-white"
         }`}
@@ -231,7 +233,7 @@ function MobileNavLink({
           className="h-2 w-2 shrink-0 rounded-full transition-transform duration-300 group-hover:scale-125"
           style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
         />
-        {item.label}
+        {label}
       </Link>
     </motion.div>
   );

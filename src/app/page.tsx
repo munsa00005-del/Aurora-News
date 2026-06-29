@@ -3,20 +3,24 @@
 //   2. Breaking-news ticker
 //   3. Trending feed (all categories combined) with infinite scroll
 
+import { cookies } from "next/headers";
 import Hero from "@/components/Hero";
 import BreakingTicker from "@/components/BreakingTicker";
 import InfiniteFeed from "@/components/InfiniteFeed";
 import ScrollReveal from "@/components/ScrollReveal";
 import { getTrending, getTicker } from "@/lib/queries";
+import { normalizeLang, LANG_COOKIE, makeT } from "@/lib/i18n";
 import { TrendingUp } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
+  const lang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
+  const t = makeT(lang);
   const [{ items, nextCursor }, ticker] = await Promise.all([
-    getTrending(18),
-    getTicker(12),
+    getTrending(18, null, lang),
+    getTicker(12, lang),
   ]);
 
   return (
@@ -33,21 +37,22 @@ export default async function Home() {
           <ScrollReveal className="mb-10 flex flex-col items-start gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
               <TrendingUp className="h-3.5 w-3.5 text-amber" />
-              Trending now
+              {t("trending.badge")}
             </span>
             <h2 className="font-display text-3xl font-bold tracking-tight sm:text-5xl">
-              What the world is <span className="text-gradient">reading</span>
+              {t("trending.title1")}{" "}
+              <span className="text-gradient">{t("trending.title2")}</span>
             </h2>
-            <p className="max-w-xl text-white/55">
-              The highest-signal stories across every category, ranked live by
-              recency, source weight and engagement.
-            </p>
+            <p className="max-w-xl text-white/55">{t("trending.subtitle")}</p>
           </ScrollReveal>
 
           <InfiniteFeed
-            endpoint="/api/trending"
+            key={lang}
+            endpoint={`/api/trending?lang=${lang}`}
             initial={items}
             initialCursor={nextCursor}
+            emptyLabel={t("feed.empty")}
+            endLabel={t("feed.end")}
           />
         </section>
       </div>

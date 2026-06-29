@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
+import { Lang, makeT, catLabel } from "@/lib/i18n";
 
-export default function Footer() {
+export default function Footer({ lang = "en" }: { lang?: Lang }) {
   const year = new Date().getFullYear();
+  const t = makeT(lang);
   return (
     <footer className="relative z-10 mt-24 border-t border-white/10 bg-black/40 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-6 py-14">
@@ -13,14 +15,13 @@ export default function Footer() {
               <span className="ml-1 font-light text-white/70">News</span>
             </div>
             <p className="mt-3 max-w-sm text-sm text-white/50">
-              A futuristic, AI-curated news platform. Continuously synced
-              trending stories from every corner of the world.
+              {t("footer.tagline")}
             </p>
           </div>
 
           <div>
             <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">
-              Categories
+              {t("footer.categories")}
             </h4>
             <ul className="grid grid-cols-2 gap-y-2 text-sm">
               {CATEGORIES.map((c) => (
@@ -29,7 +30,7 @@ export default function Footer() {
                     href={`/category/${c.slug}`}
                     className="text-white/60 transition hover:text-white"
                   >
-                    {c.label}
+                    {catLabel(lang, c.slug)}
                   </Link>
                 </li>
               ))}
@@ -38,12 +39,12 @@ export default function Footer() {
 
           <div>
             <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">
-              Platform
+              {t("footer.platform")}
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/" className="text-white/60 transition hover:text-white">
-                  Home
+                  {t("nav.home")}
                 </Link>
               </li>
               <li>
@@ -51,7 +52,7 @@ export default function Footer() {
                   href="/search"
                   className="text-white/60 transition hover:text-white"
                 >
-                  Search
+                  {t("nav.search")}
                 </Link>
               </li>
               <li>
@@ -62,13 +63,14 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row">
-          <span>© {year} Aurora News. Crafted in the dark.</span>
-          <span>Updated automatically every 6 hours.</span>
+          <span>© {year} Aurora News.</span>
+          <span>{t("footer.updated")}</span>
         </div>
 
         <div className="mt-6 text-center">
           <span className="text-sm font-medium tracking-wide">
-            Made by : <span className="aurora-text font-display font-bold">NITESH KUMAR</span>
+            {t("footer.madeBy")}{" "}
+            <span className="aurora-text font-display font-bold">NITESH KUMAR</span>
           </span>
         </div>
       </div>
