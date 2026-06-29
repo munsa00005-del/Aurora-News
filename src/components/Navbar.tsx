@@ -56,30 +56,15 @@ export default function Navbar() {
           <Logo compact={scrolled} />
 
           {/* Desktop category links */}
-          <div className="no-scrollbar ml-2 hidden flex-1 items-center gap-1 overflow-x-auto lg:flex">
-            {NAV.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`relative whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition ${
-                    active
-                      ? "text-white"
-                      : "text-white/60 hover:text-white"
-                  }`}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="nav-active"
-                      className="absolute inset-0 -z-10 rounded-full bg-white/10"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  {item.label}
-                </Link>
-              );
-            })}
+          <div className="no-scrollbar ml-2 hidden flex-1 items-center gap-0.5 overflow-x-auto py-1 lg:flex">
+            {NAV.map((item, i) => (
+              <NavLink
+                key={item.href}
+                item={item}
+                active={isActive(item.href)}
+                index={i}
+              />
+            ))}
           </div>
 
           <div className="ml-auto flex items-center gap-2">
@@ -135,23 +120,119 @@ export default function Navbar() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              {NAV.map((item) => (
-                <Link
+              {NAV.map((item, i) => (
+                <MobileNavLink
                   key={item.href}
-                  href={item.href}
-                  className={`rounded-xl px-4 py-2.5 text-sm transition ${
-                    isActive(item.href)
-                      ? "bg-white/10 text-white"
-                      : "text-white/65 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </Link>
+                  item={item}
+                  active={isActive(item.href)}
+                  index={i}
+                />
               ))}
             </motion.aside>
           </motion.div>
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+type NavItem = { slug: string; label: string; href: string; accent?: string };
+
+// Animated, accent-coloured desktop nav pill: glowing dot, hover glow,
+// gradient underline, and a colour-morphing active background.
+function NavLink({
+  item,
+  active,
+  index,
+}: {
+  item: NavItem;
+  active: boolean;
+  index: number;
+}) {
+  const accent = item.accent || "#A855F7";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.05 + index * 0.035, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <Link
+        href={item.href}
+        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition-transform duration-200 hover:-translate-y-0.5"
+      >
+        {/* hover glow halo */}
+        <span
+          className="pointer-events-none absolute inset-0 -z-10 rounded-full opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100"
+          style={{ background: `radial-gradient(70% 120% at 50% 50%, ${accent}66, transparent 70%)` }}
+        />
+        {/* active pill — shared layout element morphs colour as you navigate */}
+        {active && (
+          <motion.span
+            layoutId="nav-active"
+            className="absolute inset-0 -z-10 rounded-full"
+            style={{
+              background: `${accent}26`,
+              border: `1px solid ${accent}80`,
+              boxShadow: `0 0 18px -4px ${accent}, inset 0 0 12px -6px ${accent}`,
+            }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          />
+        )}
+        {/* accent status dot */}
+        <span
+          className={`h-1.5 w-1.5 shrink-0 rounded-full transition-all duration-300 ${
+            active ? "scale-110" : "scale-75 opacity-50 group-hover:scale-110 group-hover:opacity-100"
+          }`}
+          style={{ background: accent, boxShadow: `0 0 8px ${accent}` }}
+        />
+        <span className={active ? "text-white" : "text-white/60 transition-colors group-hover:text-white"}>
+          {item.label}
+        </span>
+        {/* animated gradient underline */}
+        <span
+          className="pointer-events-none absolute -bottom-px left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full transition-all duration-300 group-hover:w-3/4"
+          style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+        />
+      </Link>
+    </motion.div>
+  );
+}
+
+// Mobile drawer link: staggered slide-in with an accent dot + accent hover bar.
+function MobileNavLink({
+  item,
+  active,
+  index,
+}: {
+  item: NavItem;
+  active: boolean;
+  index: number;
+}) {
+  const accent = item.accent || "#A855F7";
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 24 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.06 + index * 0.04, duration: 0.35 }}
+    >
+      <Link
+        href={item.href}
+        className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-4 py-2.5 text-sm transition ${
+          active ? "text-white" : "text-white/65 hover:text-white"
+        }`}
+        style={active ? { background: `${accent}1f` } : {}}
+      >
+        {/* sliding accent fill on hover */}
+        <span
+          className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-0 transition-all duration-300 group-hover:w-full"
+          style={{ background: `linear-gradient(90deg, ${accent}22, transparent)` }}
+        />
+        <span
+          className="h-2 w-2 shrink-0 rounded-full transition-transform duration-300 group-hover:scale-125"
+          style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
+        />
+        {item.label}
+      </Link>
+    </motion.div>
   );
 }
