@@ -19,9 +19,14 @@ const GROQ_MODEL =
     ? configuredModel
     : "llama-3.1-8b-instant";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const BETWEEN_CALLS_MS = Number(process.env.GROQ_BETWEEN_CALLS_MS || 5000);
+// Steady pacing: ~1 request / 30s keeps us comfortably under Groq's free-tier
+// limits so a large backlog clears without 429 storms. Override via env.
+const BETWEEN_CALLS_MS = Number(process.env.GROQ_BETWEEN_CALLS_MS || 30000);
 const RATE_LIMIT_WAIT_MS = Number(process.env.GROQ_RATE_LIMIT_WAIT_MS || 65000);
 const MAX_ATTEMPTS = Number(process.env.GROQ_MAX_ATTEMPTS || 8);
+// Optional cap on articles processed per run (0 = no cap). Keeps a scheduled
+// job within a time budget (e.g. GitHub Actions' 6h job limit).
+const SUMMARIZE_MAX = Number(process.env.SUMMARIZE_MAX || 0);
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -252,10 +257,14 @@ async function main() {
   console.log(`📰 Found ${articles.length} total articles.`);
 
   // Filter out already-summarized articles
-  const pending = articles.filter((a) => !isAlreadySummarized(a.content, a.language));
+  let pending = articles.filter((a) => !isAlreadySummarized(a.content, a.language));
   console.log(
     `✍  ${pending.length} need summarization (${articles.length - pending.length} already done).`
   );
+  if (SUMMARIZE_MAX > 0 && pending.length > SUMMARIZE_MAX) {
+    pending = pending.slice(0, SUMMARIZE_MAX);
+    console.log(`⏳ capping this run to ${SUMMARIZE_MAX} (SUMMARIZE_MAX).`);
+  }
 
   if (!pending.length) {
     console.log("✅ All articles already summarized! Nothing to do.");
