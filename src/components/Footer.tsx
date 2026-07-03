@@ -11,8 +11,8 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <div className="font-display text-2xl font-bold">
-              <span className="aurora-text">AURORA</span>
-              <span className="ml-1 font-light text-white/70">News</span>
+              <span className="aurora-text">BRIEF</span>
+              <span className="font-light text-white/70">XIFY</span>
             </div>
             <p className="mt-3 max-w-sm text-sm text-white/50">
               {t("footer.tagline")}
@@ -56,6 +56,38 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/about-us"
+                  className="text-white/60 transition hover:text-white"
+                >
+                  {t("footer.about")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact-us"
+                  className="text-white/60 transition hover:text-white"
+                >
+                  {t("footer.contact")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className="text-white/60 transition hover:text-white"
+                >
+                  {t("footer.privacy")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/disclaimer"
+                  className="text-white/60 transition hover:text-white"
+                >
+                  {t("footer.disclaimer")}
+                </Link>
+              </li>
+              <li>
                 <span className="text-white/40">Powered by GNews</span>
               </li>
             </ul>
@@ -63,7 +95,7 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row">
-          <span>© {year} Aurora News.</span>
+          <span>© {year} BRIEFXIFY.</span>
           <span>{t("footer.updated")}</span>
         </div>
 
