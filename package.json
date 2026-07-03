@@ -49,6 +49,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@types/three": "^0.185.0",
     "embedded-postgres": "^18.4.0-beta.17",
+    "libsodium-wrappers": "^0.8.4",
     "postcss": "^8",
     "prisma": "^6.19.3",
     "tailwindcss": "^3.4.1",

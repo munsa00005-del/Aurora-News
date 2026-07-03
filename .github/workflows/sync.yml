@@ -1,0 +1,27 @@
+# Scheduled news sync + summarization for BRIEFXIFY.
+# Vercel's free plan only allows daily crons, so GitHub Actions drives the
+# every-6-hours cadence by calling the sync endpoint (auth'd with CRON_SECRET).
+name: news-sync
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours (UTC)
+  workflow_dispatch: {}       # allow manual runs from the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger sync + summarization
+        run: |
+          echo "Triggering BRIEFXIFY sync…"
+          code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+            --max-time 800 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://briefxify.vercel.app/api/cron/sync")
+          echo "HTTP $code"
+          cat /tmp/resp.json || true
+          # 200 ok, 409 = a sync already running (still fine)
+          if [ "$code" != "200" ] && [ "$code" != "409" ]; then
+            exit 1
+          fi
