@@ -2,11 +2,10 @@
 
 // Language context. Seeded server-side from the `lang` cookie (passed as
 // `initial`) so the first client render matches SSR — no hydration flash.
-// Switching writes the cookie and refreshes server components so the feed
-// re-fetches in the new language.
+// Switching writes the cookie and reloads the current page so all server and
+// client state restarts in the selected language.
 
 import { createContext, useContext, useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Lang, LANG_COOKIE, makeT } from "@/lib/i18n";
 
 interface LangCtx {
@@ -24,7 +23,6 @@ export function LangProvider({
   initial: Lang;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const [lang, setLangState] = useState<Lang>(initial);
 
   const setLang = useCallback(
@@ -35,10 +33,9 @@ export function LangProvider({
         localStorage.setItem(LANG_COOKIE, l);
       } catch {}
       setLangState(l);
-      // Re-render server components (feeds re-fetch in the new language).
-      router.refresh();
+      window.location.reload();
     },
-    [lang, router]
+    [lang]
   );
 
   return (

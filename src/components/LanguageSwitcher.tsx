@@ -11,15 +11,15 @@ export default function LanguageSwitcher() {
   const { lang, setLang } = useLang();
 
   return (
-    <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
-      <Globe2 className="ml-1.5 h-3.5 w-3.5 shrink-0 text-white/45" />
+    <div className="flex items-center gap-0.5 rounded-full border border-white/10 bg-white/5 p-0.5 sm:gap-1">
+      <Globe2 className="ml-1 h-3.5 w-3.5 shrink-0 text-white/45 sm:ml-1.5" />
       {LANGS.map((l: Lang) => {
         const active = lang === l;
         return (
           <button
             key={l}
             onClick={() => setLang(l)}
-            className={`relative rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+            className={`relative rounded-full px-2 py-1 text-[11px] font-medium transition-colors sm:px-2.5 sm:text-xs ${
               active ? "text-white" : "text-white/55 hover:text-white"
             }`}
             aria-pressed={active}

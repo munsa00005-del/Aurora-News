@@ -6,9 +6,9 @@
 import { cookies } from "next/headers";
 import Hero from "@/components/Hero";
 import BreakingTicker from "@/components/BreakingTicker";
-import InfiniteFeed from "@/components/InfiniteFeed";
+import NewsCard from "@/components/NewsCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import { getTrending, getTicker } from "@/lib/queries";
+import { getTicker, getTopTrendingByCategory } from "@/lib/queries";
 import { normalizeLang, LANG_COOKIE, makeT } from "@/lib/i18n";
 import { TrendingUp } from "lucide-react";
 
@@ -18,8 +18,8 @@ export const revalidate = 0;
 export default async function Home() {
   const lang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
   const t = makeT(lang);
-  const [{ items, nextCursor }, ticker] = await Promise.all([
-    getTrending(18, null, lang),
+  const [items, ticker] = await Promise.all([
+    getTopTrendingByCategory(lang),
     getTicker(12, lang),
   ]);
 
@@ -46,14 +46,22 @@ export default async function Home() {
             <p className="max-w-xl text-white/55">{t("trending.subtitle")}</p>
           </ScrollReveal>
 
-          <InfiniteFeed
-            key={lang}
-            endpoint={`/api/trending?lang=${lang}`}
-            initial={items}
-            initialCursor={nextCursor}
-            emptyLabel={t("feed.empty")}
-            endLabel={t("feed.end")}
-          />
+          {items.length ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((article, index) => (
+                <NewsCard
+                  key={article.id}
+                  article={article}
+                  index={index}
+                  priority={index < 3}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="glass rounded-2xl px-6 py-16 text-center text-white/50">
+              {t("feed.empty")}
+            </div>
+          )}
         </section>
       </div>
     </>

@@ -13,7 +13,7 @@ export default function InfiniteFeed({
   initial,
   initialCursor,
   emptyLabel = "No articles yet — the next sync will fill this in.",
-  endLabel = "You’ve reached the edge of the aurora ✦",
+  endLabel = "You’ve reached the edge of the orbit ✦",
 }: {
   endpoint: string; // e.g. "/api/trending" or "/api/category/india"
   initial: Article[];

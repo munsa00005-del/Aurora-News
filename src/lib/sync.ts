@@ -13,6 +13,11 @@ import { CATEGORIES, CategoryConfig } from "./categories";
 import { fetchCategory, hasApiKey, GNewsArticle } from "./gnews";
 import { computeScore } from "./trending";
 import { slugify, hash } from "./utils";
+import {
+  looksLikeOriginalReportForLanguage,
+  rewriteArticle,
+} from "./rewrite";
+import { serializeArticle } from "./serialize";
 
 // Module-level guard so overlapping triggers (cron + manual) don't double-run.
 let running = false;
@@ -66,7 +71,7 @@ async function syncCategory(
 
       const existing = await prisma.news.findFirst({
         where: { OR: [{ url: a.url }, { dedupeKey: key }] },
-        select: { id: true },
+        select: { id: true, content: true },
       });
 
       const data = {
@@ -89,16 +94,34 @@ async function syncCategory(
           where: { id: existing.id },
           data: {
             description: data.description,
-            content: data.content,
+            content: looksLikeOriginalReportForLanguage(existing.content, lang)
+              ? existing.content
+              : data.content,
             image: data.image,
           },
         });
         duplicates++;
       } else {
-        await prisma.news.create({
+        const created = await prisma.news.create({
           data: { ...data, slug: slugify(a.title, a.url) },
         });
         inserted++;
+
+        // Auto-summarize newly inserted articles with Groq.
+        try {
+          const serialized = serializeArticle(created);
+          const summary = await rewriteArticle(serialized);
+          if (summary) {
+            await prisma.news.update({
+              where: { id: created.id },
+              data: { content: summary },
+            });
+          }
+        } catch (e) {
+          // Non-fatal: article is saved even if summarization fails.
+          // It will be summarized on first page view instead.
+          console.error(`[BRIEFXIFY] Auto-summarize failed for "${a.title.slice(0, 40)}"`, e);
+        }
       }
     }
 

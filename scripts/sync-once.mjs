@@ -6,6 +6,7 @@
 // SYNC_LANGS env (default "en,hi") controls which languages are pulled.
 
 import { PrismaClient } from "@prisma/client";
+import "./env.mjs";
 
 const prisma = new PrismaClient();
 const BASE = "https://gnews.io/api/v4";
@@ -59,6 +60,17 @@ function score({ publishedAt, weight, source, views }) {
   const eng = 1 + Math.log1p(views) / 6;
   return Number((recency * weight * sourceWeight(source) * eng * 100).toFixed(4));
 }
+function isAlreadySummarized(content) {
+  return !!content &&
+    (
+      /<h[23]>Quick Brief<\/h[23]>/i.test(content) ||
+      /<h[23]>त्वरित ब्रीफ<\/h[23]>/i.test(content)
+    ) &&
+    (
+      /BRIEFXIFY brief is AI-assisted/i.test(content) ||
+      /BRIEFXIFY ब्रीफ AI-सहायता से तैयार/i.test(content)
+    );
+}
 
 async function fetchCat(cat, lang) {
   const p = new URLSearchParams({ apikey: KEY, lang, max: String(Math.min(cat.limit + 4, 25)) });
@@ -87,7 +99,7 @@ async function syncCat(cat, lang) {
     if (seen.has(key)) continue;
     seen.add(key);
     const existing = await prisma.news.findFirst({
-      where: { OR: [{ url: a.url }, { dedupeKey: key }] }, select: { id: true },
+      where: { OR: [{ url: a.url }, { dedupeKey: key }] }, select: { id: true, content: true },
     });
     const data = {
       title: a.title.slice(0, 500),
@@ -103,7 +115,14 @@ async function syncCat(cat, lang) {
       publishedAt: new Date(a.publishedAt || Date.now()),
     };
     if (existing) {
-      await prisma.news.update({ where: { id: existing.id }, data: { description: data.description, content: data.content, image: data.image } });
+      await prisma.news.update({
+        where: { id: existing.id },
+        data: {
+          description: data.description,
+          content: isAlreadySummarized(existing.content) ? existing.content : data.content,
+          image: data.image,
+        },
+      });
       dupes++;
     } else {
       await prisma.news.create({ data: { ...data, slug: slugify(a.title, a.url) } });

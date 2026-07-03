@@ -56,10 +56,10 @@ export default function Navbar() {
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           scrolled
             ? "glass-strong border-b border-white/10 py-2"
-            : "border-b border-transparent py-3"
+            : "border-b border-transparent py-2.5 sm:py-3"
         }`}
       >
-        <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 sm:px-6">
+        <nav className="mx-auto flex max-w-7xl items-center gap-2 px-3 sm:gap-4 sm:px-6">
           <Logo compact={scrolled} />
 
           {/* Desktop category links */}
@@ -76,11 +76,12 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
             <LanguageSwitcher />
             <button
               onClick={openSearch}
-              className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/60 transition hover:border-white/25 hover:text-white"
+              aria-label={t("nav.search")}
+              className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/25 hover:text-white sm:h-auto sm:w-auto sm:gap-2 sm:px-3 sm:py-1.5 sm:text-sm"
             >
               <Search className="h-4 w-4" />
               <span className="hidden sm:inline">{t("nav.search")}</span>
@@ -92,12 +93,41 @@ export default function Navbar() {
             <button
               onClick={() => setDrawer(true)}
               aria-label="Open menu"
-              className="rounded-full border border-white/10 bg-white/5 p-2 text-white/70 transition hover:text-white lg:hidden"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white lg:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
           </div>
         </nav>
+
+        <div className="mt-2 border-t border-white/5 lg:hidden">
+          <nav
+            aria-label="Mobile categories"
+            className="no-scrollbar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 py-2"
+          >
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`relative shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  isActive(item.href)
+                    ? "border-white/25 bg-white/10 text-white"
+                    : "border-white/10 bg-white/[0.03] text-white/62"
+                }`}
+                style={
+                  isActive(item.href) && item.accent
+                    ? {
+                        borderColor: `${item.accent}88`,
+                        boxShadow: `inset 0 0 12px -8px ${item.accent}`,
+                      }
+                    : undefined
+                }
+              >
+                {navLabel(lang, item.slug, t)}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </header>
 
       {/* Mobile drawer */}
@@ -119,7 +149,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="glass-strong absolute right-0 top-0 flex h-full w-72 flex-col gap-1 overflow-y-auto p-5"
+              className="glass-strong absolute right-0 top-0 flex h-full w-[min(84vw,20rem)] flex-col gap-1 overflow-y-auto p-5"
             >
               <div className="mb-4 flex items-center justify-between">
                 <Logo compact />

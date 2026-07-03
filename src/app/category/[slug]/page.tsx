@@ -26,7 +26,7 @@ export async function generateMetadata({
   if (!cat) return { title: "Not found" };
   return {
     title: `${cat.label} news`,
-    description: `Latest ${cat.label} stories on Aurora News — continuously synced.`,
+    description: `Latest ${cat.label} stories on BRIEFXIFY — continuously synced.`,
   };
 }
 
@@ -44,7 +44,7 @@ export default async function CategoryPage({
   const { items, nextCursor } = await getByCategory(cat.slug, cat.limit, null, lang);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 sm:pt-32">
+    <div className="mx-auto max-w-7xl px-4 pb-10 pt-36 sm:px-6 sm:pt-32">
       <ScrollReveal className="mb-10">
         <div
           className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider"
@@ -56,7 +56,7 @@ export default async function CategoryPage({
           />
           {t("category.badge")}
         </div>
-        <h1 className="font-display text-4xl font-bold tracking-tight sm:text-6xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight sm:text-6xl">
           <span
             style={{
               backgroundImage: `linear-gradient(115deg, #fff, ${cat.accent})`,

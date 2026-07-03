@@ -1,6 +1,6 @@
 // Article detail page.
 //   • large hero image + headline + source + date + reading time
-//   • full content/description, share buttons, reading progress, view tracking
+//   • Groq-generated original report, reading progress, view tracking
 //   • related-news recommendations
 
 import { notFound } from "next/navigation";
@@ -14,6 +14,10 @@ import { categoryAccent } from "@/lib/categories";
 import { normalizeLang, LANG_COOKIE, makeT, catLabel } from "@/lib/i18n";
 import { formatDate, readingTime, timeAgo, gradientFor } from "@/lib/utils";
 import { extractFullContent, isTruncated, looksLikeHtml } from "@/lib/extract";
+import {
+  looksLikeOriginalReportForLanguage,
+  rewriteArticle,
+} from "@/lib/rewrite";
 import { prisma } from "@/lib/db";
 import ReadingProgress from "@/components/ReadingProgress";
 import ViewTracker from "@/components/ViewTracker";
@@ -53,12 +57,30 @@ export default async function ArticlePage({
   const uiLang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
   const t = makeT(uiLang);
 
-  // Make sure the FULL article is readable on our site. If we only have the
-  // GNews snippet, fetch + extract the original page once and cache the clean
-  // HTML back into the DB so future views are instant.
-  let contentHtml: string | null = looksLikeHtml(article.content)
+  // Prefer an original BRIEFXIFY report generated from GNews/source metadata.
+  // It is cached in `content` so Groq is called once per article after quota
+  // is available. Older extracted HTML remains only as a fallback.
+  let contentHtml: string | null = looksLikeOriginalReportForLanguage(
+    article.content,
+    article.language
+  )
     ? article.content
     : null;
+  if (!contentHtml) {
+    const rewritten = await rewriteArticle(article);
+    if (rewritten) {
+      contentHtml = rewritten;
+      await prisma.news
+        .update({ where: { id: article.id }, data: { content: rewritten } })
+        .catch(() => {});
+    }
+  }
+
+  // Fallback when AI rewrite is unavailable: fetch + extract the original page
+  // once and cache sanitized HTML so the article remains readable.
+  if (!contentHtml && looksLikeHtml(article.content)) {
+    contentHtml = article.content;
+  }
   if (!contentHtml && isTruncated(article.content) && article.url) {
     const full = await extractFullContent(article.url);
     if (full) {

@@ -50,7 +50,7 @@ export default async function SearchPage({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 sm:pt-32">
+    <div className="mx-auto max-w-7xl px-4 pb-10 pt-36 sm:px-6 sm:pt-32">
       <div className="mb-3 inline-flex items-center gap-2 text-sm text-white/50">
         <SearchIcon className="h-4 w-4" /> {t("search.results")}
       </div>

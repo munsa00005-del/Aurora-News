@@ -14,15 +14,16 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import net from "node:net";
 import fs from "node:fs";
+import "./env.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DATA_DIR = resolve(ROOT, ".pgdata");
 
 const PORT = Number(process.env.PG_PORT || 5433);
-const USER = process.env.PG_USER || "aurora";
-const PASSWORD = process.env.PG_PASSWORD || "aurora";
-const DB_NAME = process.env.PG_DB || "aurora_news";
+const USER = process.env.PG_USER || "orbitnews";
+const PASSWORD = process.env.PG_PASSWORD || "orbitnews";
+const DB_NAME = process.env.PG_DB || "orbitnews";
 
 export const DATABASE_URL = `postgresql://${USER}:${PASSWORD}@127.0.0.1:${PORT}/${DB_NAME}`;
 

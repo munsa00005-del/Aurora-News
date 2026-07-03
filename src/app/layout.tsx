@@ -20,7 +20,7 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Aurora News";
+const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "BRIEFXIFY";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {

@@ -1,4 +1,4 @@
-// Aurora News — data model
+// BRIEFXIFY — data model
 // DB: PostgreSQL (runs in userspace via embedded-postgres for local dev)
 
 generator client {

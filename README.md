@@ -1,4 +1,4 @@
-# Aurora News ✦
+# BRIEFXIFY
 
 A premium, futuristic, AI-curated news platform. Cinematic animated background,
 interactive 3D globe, glassmorphism cards, infinite scroll, and a fully
@@ -36,6 +36,9 @@ npm run dev                 # auto-starts Postgres + pushes schema
 npm run sync                # (optional) pull real articles right now
 ```
 
+Set `GROQ_API_KEY` to enable BRIEFXIFY' on-page original report rewrite for
+articles. The app caches each generated report in the article content field.
+
 Open http://localhost:3000.
 
 ## Deploying to Vercel (live, free)
@@ -45,7 +48,7 @@ GitHub Pages. Steps:
 
 ### 1. Push to GitHub
 ```bash
-git remote add origin https://github.com/<you>/aurora-news.git
+git remote add origin https://github.com/<you>/orbitnews.git
 git push -u origin main
 ```
 
@@ -60,10 +63,12 @@ Add these **Environment Variables** in the Vercel project settings:
 | --- | --- |
 | `DATABASE_URL` | your Neon/Supabase connection string |
 | `GNEWS_API_KEY` | your GNews key |
+| `GROQ_API_KEY` | your Groq API key |
+| `GROQ_MODEL` | `llama-3.1-8b-instant` |
 | `CRON_SECRET` | a long random string |
 | `AUTH_SECRET` | a long random string |
 | `NEXT_PUBLIC_SITE_URL` | your `https://<project>.vercel.app` URL |
-| `NEXT_PUBLIC_SITE_NAME` | `Aurora News` |
+| `NEXT_PUBLIC_SITE_NAME` | `BRIEFXIFY` |
 
 ### 4. Initialize the database schema (one-time)
 With `DATABASE_URL` pointing at your cloud DB:

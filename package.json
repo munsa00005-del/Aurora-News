@@ -1,5 +1,5 @@
 {
-  "name": "aurora-news",
+  "name": "orbitnews",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
     "start": "next start",
     "lint": "next lint",
     "sync": "node scripts/sync-once.mjs",
+    "summarize": "node scripts/grok-summarize-all.mjs",
     "postinstall": "prisma generate"
   },
   "engines": {

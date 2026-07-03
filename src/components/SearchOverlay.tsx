@@ -19,7 +19,7 @@ import { catLabel } from "@/lib/i18n";
 import type { Article } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 
-const HISTORY_KEY = "aurora_search_history";
+const HISTORY_KEY = "orbitnews_search_history";
 
 function loadHistory(): string[] {
   if (typeof window === "undefined") return [];
@@ -110,7 +110,7 @@ export default function SearchOverlay() {
     <AnimatePresence>
       {searchOpen && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[10vh] sm:pt-[14vh]"
+          className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-[8vh] sm:px-4 sm:pt-[14vh]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -125,10 +125,10 @@ export default function SearchOverlay() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -16, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 260, damping: 24 }}
-            className="glass-strong relative w-full max-w-2xl overflow-hidden rounded-3xl shadow-glow"
+            className="glass-strong relative w-full max-w-2xl overflow-hidden rounded-2xl shadow-glow sm:rounded-3xl"
           >
             {/* Input */}
-            <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
+            <div className="flex items-center gap-2 border-b border-white/10 px-3 py-3 sm:gap-3 sm:px-5 sm:py-4">
               <Search className="h-5 w-5 shrink-0 text-white/50" />
               <input
                 ref={inputRef}
@@ -136,7 +136,7 @@ export default function SearchOverlay() {
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
                 placeholder={t("search.placeholder")}
-                className="w-full bg-transparent text-lg text-white placeholder-white/35 outline-none"
+                className="min-w-0 w-full bg-transparent text-base text-white placeholder-white/35 outline-none sm:text-lg"
               />
               {loading && (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-cyan" />
@@ -150,7 +150,7 @@ export default function SearchOverlay() {
             </div>
 
             {/* Category filter chips */}
-            <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-white/5 px-5 py-3">
+            <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-white/5 px-3 py-3 sm:px-5">
               <Chip active={category === ""} onClick={() => setCategory("")}>
                 {t("search.all")}
               </Chip>
@@ -167,7 +167,7 @@ export default function SearchOverlay() {
             </div>
 
             {/* Body */}
-            <div className="max-h-[48vh] overflow-y-auto p-3">
+            <div className="max-h-[62vh] overflow-y-auto p-2 sm:max-h-[48vh] sm:p-3">
               {q.trim() ? (
                 <>
                   {suggestions.length > 0 ? (
@@ -177,13 +177,13 @@ export default function SearchOverlay() {
                           <Link
                             href={`/article/${a.slug}`}
                             onClick={closeSearch}
-                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/5"
+                            className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/5 sm:items-center"
                           >
                             <Search className="h-4 w-4 shrink-0 text-white/30" />
                             <span className="line-clamp-1 flex-1 text-sm text-white/90">
                               {a.title}
                             </span>
-                            <span className="shrink-0 text-[11px] uppercase tracking-wide text-white/35">
+                            <span className="hidden shrink-0 text-[11px] uppercase tracking-wide text-white/35 sm:inline">
                               {catLabel(lang, a.category)} · {timeAgo(a.publishedAt)}
                             </span>
                           </Link>

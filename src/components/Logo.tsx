@@ -48,10 +48,10 @@ export default function Logo({
     <Link
       ref={ref}
       href="/"
-      aria-label="Aurora News — home"
+      aria-label="BRIEFXIFY — home"
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      className="group inline-flex items-center gap-3"
+      className="group inline-flex min-w-0 items-center gap-2 sm:gap-3"
     >
       {/* Orbital mark */}
       <motion.span
@@ -127,11 +127,11 @@ export default function Logo({
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.25, duration: 0.5 }}
         className={`font-display font-bold tracking-tight ${
-          compact ? "text-lg" : "text-2xl"
+          compact ? "text-base sm:text-lg" : "text-2xl"
         }`}
       >
-        <span className="aurora-text">AURORA</span>
-        <span className="ml-1 font-light text-white/70">News</span>
+        <span className="aurora-text">BRIEF</span>
+        <span className="font-light text-white/70">XIFY</span>
       </motion.span>
     </Link>
   );
