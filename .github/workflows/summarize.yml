@@ -1,7 +1,7 @@
-# Paced Gemini summarization for BRIEFXIFY.
+# Paced Groq summarization for BRIEFXIFY.
 # Runs the batch summarizer directly on the GitHub runner against the Neon DB.
-# Steady pacing stays under stricter free-model rate limits; each
-# run clears a bounded chunk so automatic summarization keeps moving reliably.
+# Steady 1-request-per-30s pacing stays under Groq's free-tier limits; a 6h job
+# can clear ~650 articles per run, so the backlog stays cleared.
 name: news-summarize
 
 on:
@@ -26,11 +26,11 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Generate Prisma client
         run: npx prisma generate
-      - name: Summarize pending articles
+      - name: Summarize (paced 30s/req)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
-          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
-          GEMINI_BETWEEN_CALLS_MS: "15000"
-          SUMMARIZE_MAX: "120"
-        run: node scripts/gemini-summarize-all.mjs
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          GROQ_BETWEEN_CALLS_MS: "30000"
+          SUMMARIZE_MAX: "650"
+        run: node scripts/grok-summarize-all.mjs
