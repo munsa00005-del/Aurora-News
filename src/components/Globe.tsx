@@ -4,7 +4,7 @@
 // no external textures. A point-cloud "land" shell over a glowing wire sphere,
 // orbiting arcs, and gentle mouse-reactive rotation. Lazy-friendly and light.
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
@@ -105,12 +105,29 @@ function GlobeMesh() {
 }
 
 export default function Globe() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+
+  // Stop the WebGL render loop whenever the hero scrolls out of view — no point
+  // burning GPU on a globe nobody can see while reading the feed.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.01 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <div className="h-full w-full">
+    <div ref={wrapRef} className="h-full w-full">
       <Canvas
+        frameloop={visible ? "always" : "never"}
         camera={{ position: [0, 0, 5], fov: 45 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 1.3]}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       >
         <ambientLight intensity={0.6} />
         <Suspense fallback={null}>

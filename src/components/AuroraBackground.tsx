@@ -39,8 +39,11 @@ export default function AuroraBackground() {
   );
 
   useEffect(() => {
+    // Fewer particles on smaller screens; capped low so the ambient layer stays
+    // cheap. Each is an animated, glowing DOM node — they add up fast.
+    const count = window.innerWidth < 768 ? 5 : 9;
     setParticles(
-      Array.from({ length: 18 }, (_, id) => ({
+      Array.from({ length: count }, (_, id) => ({
         id,
         x: randomBetween(2, 98),
         y: randomBetween(4, 96),

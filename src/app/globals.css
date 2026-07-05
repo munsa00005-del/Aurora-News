@@ -123,10 +123,12 @@ a {
 }
 
 .mesh-blob {
-  opacity: 0.5;
-  filter: blur(50px);
-  will-change: transform, opacity;
-  mix-blend-mode: multiply;
+  opacity: 0.42;
+  filter: blur(44px);
+  /* transform-only compositing (no blend mode) keeps this on the GPU fast path;
+     mix-blend-mode forced an expensive backdrop re-read every frame. */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .mesh-blob-1 {
@@ -192,8 +194,8 @@ a {
   border-radius: 9999px;
   background:
     radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.98), var(--particle-color) 42%, rgba(255, 255, 255, 0) 72%);
-  box-shadow: 0 0 14px var(--particle-color), 0 0 26px rgba(255, 255, 255, 0.72);
-  opacity: 0.58;
+  box-shadow: 0 0 12px var(--particle-color);
+  opacity: 0.55;
   animation: particle-float var(--particle-duration) ease-in-out var(--particle-delay) infinite alternate;
   will-change: transform, opacity;
 }
@@ -214,8 +216,7 @@ a {
 }
 
 .background-noise {
-  opacity: 0.025;
-  mix-blend-mode: multiply;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
