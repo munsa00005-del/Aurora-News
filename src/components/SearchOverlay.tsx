@@ -19,7 +19,7 @@ import { catLabel } from "@/lib/i18n";
 import type { Article } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 
-const HISTORY_KEY = "orbitnews_search_history";
+const HISTORY_KEY = "briefxify_search_history";
 
 function loadHistory(): string[] {
   if (typeof window === "undefined") return [];
@@ -118,7 +118,7 @@ export default function SearchOverlay() {
           <button
             aria-label="Close search"
             onClick={closeSearch}
-            className="absolute inset-0 bg-black/70 backdrop-blur-xl"
+            className="absolute inset-0 bg-white/60 backdrop-blur-xl"
           />
           <motion.div
             initial={{ opacity: 0, y: -16, scale: 0.98 }}
@@ -128,29 +128,29 @@ export default function SearchOverlay() {
             className="glass-strong relative w-full max-w-2xl overflow-hidden rounded-2xl shadow-glow sm:rounded-3xl"
           >
             {/* Input */}
-            <div className="flex items-center gap-2 border-b border-white/10 px-3 py-3 sm:gap-3 sm:px-5 sm:py-4">
-              <Search className="h-5 w-5 shrink-0 text-white/50" />
+            <div className="flex items-center gap-2 border-b border-border px-3 py-3 sm:gap-3 sm:px-5 sm:py-4">
+              <Search className="h-5 w-5 shrink-0 text-muted" />
               <input
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
                 placeholder={t("search.placeholder")}
-                className="min-w-0 w-full bg-transparent text-base text-white placeholder-white/35 outline-none sm:text-lg"
+                className="min-w-0 w-full bg-transparent text-base text-ink placeholder:text-muted/65 outline-none sm:text-lg"
               />
               {loading && (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-cyan" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-accent" />
               )}
               <button
                 onClick={closeSearch}
-                className="rounded-lg p-1 text-white/40 transition hover:bg-white/10 hover:text-white"
+                className="rounded-lg p-1 text-muted transition hover:bg-white/70 hover:text-ink"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Category filter chips */}
-            <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-white/5 px-3 py-3 sm:px-5">
+            <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-border px-3 py-3 sm:px-5">
               <Chip active={category === ""} onClick={() => setCategory("")}>
                 {t("search.all")}
               </Chip>
@@ -177,13 +177,13 @@ export default function SearchOverlay() {
                           <Link
                             href={`/article/${a.slug}`}
                             onClick={closeSearch}
-                            className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/5 sm:items-center"
+                            className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/70 sm:items-center"
                           >
-                            <Search className="h-4 w-4 shrink-0 text-white/30" />
-                            <span className="line-clamp-1 flex-1 text-sm text-white/90">
+                            <Search className="h-4 w-4 shrink-0 text-muted/70" />
+                            <span className="line-clamp-1 flex-1 text-sm text-ink">
                               {a.title}
                             </span>
-                            <span className="hidden shrink-0 text-[11px] uppercase tracking-wide text-white/35 sm:inline">
+                            <span className="hidden shrink-0 text-[11px] uppercase tracking-wide text-muted/75 sm:inline">
                               {catLabel(lang, a.category)} · {timeAgo(a.publishedAt)}
                             </span>
                           </Link>
@@ -192,14 +192,14 @@ export default function SearchOverlay() {
                     </ul>
                   ) : (
                     !loading && (
-                      <p className="px-3 py-6 text-center text-sm text-white/40">
+                      <p className="px-3 py-6 text-center text-sm text-muted">
                         {t("search.noQuick")}
                       </p>
                     )
                   )}
                   <button
                     onClick={() => submit()}
-                    className="mt-2 flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-purple/20 to-cyan/20 px-4 py-3 text-sm font-medium text-white transition hover:from-purple/30 hover:to-cyan/30"
+                    className="mt-2 flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-blueblob/55 to-mintblob/55 px-4 py-3 text-sm font-medium text-ink transition hover:from-blueblob/75 hover:to-mintblob/75"
                   >
                     <span>
                       {t("search.seeAll")} “{q.trim()}”
@@ -254,11 +254,11 @@ function Chip({
   return (
     <button
       onClick={onClick}
-      style={active ? { borderColor: accent, color: "#fff" } : {}}
+      style={active ? { borderColor: accent, color: "#182033" } : {}}
       className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${
         active
-          ? "bg-white/10"
-          : "border-white/10 text-white/55 hover:border-white/25 hover:text-white"
+          ? "bg-white/70"
+          : "border-border text-muted hover:border-accent/35 hover:text-ink"
       }`}
     >
       {children}
@@ -277,7 +277,7 @@ function Section({
 }) {
   return (
     <div>
-      <div className="mb-2 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-widest text-white/40">
+      <div className="mb-2 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-widest text-muted/80">
         {icon}
         {label}
       </div>
@@ -296,7 +296,7 @@ function Pill({
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/75 transition hover:border-purple/40 hover:bg-white/10 hover:text-white"
+      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/60 px-3 py-1.5 text-sm text-muted transition hover:border-accent/35 hover:bg-white/80 hover:text-ink"
     >
       {children}
     </button>

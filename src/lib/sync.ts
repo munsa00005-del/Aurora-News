@@ -14,9 +14,9 @@ import { fetchCategory, hasApiKey, GNewsArticle } from "./gnews";
 import { computeScore } from "./trending";
 import { slugify, hash } from "./utils";
 import {
-  looksLikeOriginalReportForLanguage,
-  rewriteArticle,
-} from "./rewrite";
+  buildLocalBrief,
+  looksLikeCompleteBriefForLanguage,
+} from "./localBrief";
 import { serializeArticle } from "./serialize";
 
 // Module-level guard so overlapping triggers (cron + manual) don't double-run.
@@ -94,7 +94,7 @@ async function syncCategory(
           where: { id: existing.id },
           data: {
             description: data.description,
-            content: looksLikeOriginalReportForLanguage(existing.content, lang)
+            content: looksLikeCompleteBriefForLanguage(existing.content, lang)
               ? existing.content
               : data.content,
             image: data.image,
@@ -107,24 +107,16 @@ async function syncCategory(
         });
         inserted++;
 
-        // Auto-summarize newly inserted articles with Groq — ONLY when
-        // SUMMARIZE_ON_SYNC=true. On serverless (Vercel), Groq is slow/rate
-        // limited and would time out the sync function, so summarization is
-        // instead handled by (a) the on-view fallback and (b) the dedicated
-        // paced batch job (GitHub Actions running grok-summarize-all.mjs).
-        if (process.env.SUMMARIZE_ON_SYNC === "true") {
-          try {
-            const serialized = serializeArticle(created);
-            const summary = await rewriteArticle(serialized);
-            if (summary) {
-              await prisma.news.update({
-                where: { id: created.id },
-                data: { content: summary },
-              });
-            }
-          } catch (e) {
-            console.error(`[BRIEFXIFY] Auto-summarize failed for "${a.title.slice(0, 40)}"`, e);
-          }
+        // Auto-summarize newly inserted articles locally so no row is left as a raw feed snippet.
+        try {
+          const serialized = serializeArticle(created);
+          const summary = buildLocalBrief(serialized);
+          await prisma.news.update({
+            where: { id: created.id },
+            data: { content: summary },
+          });
+        } catch (e) {
+          console.error(`[BRIEFXIFY] Auto-summarize failed for "${a.title.slice(0, 40)}"`, e);
         }
       }
     }

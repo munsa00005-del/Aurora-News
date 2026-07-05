@@ -51,7 +51,7 @@ export default async function SearchPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-10 pt-36 sm:px-6 sm:pt-32">
-      <div className="mb-3 inline-flex items-center gap-2 text-sm text-white/50">
+      <div className="mb-3 inline-flex items-center gap-2 text-sm text-muted">
         <SearchIcon className="h-4 w-4" /> {t("search.results")}
       </div>
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-5xl">
@@ -64,7 +64,7 @@ export default async function SearchPage({
         )}
       </h1>
       {q && (
-        <p className="mt-2 text-white/55">
+        <p className="mt-2 text-muted">
           {items.length === 0
             ? t("search.none")
             : `${t("search.showing")}${category ? ` · ${catLabel(lang, category)}` : ""}.`}
@@ -96,7 +96,7 @@ export default async function SearchPage({
             endLabel={t("feed.end")}
           />
         ) : (
-          <p className="glass rounded-2xl px-6 py-16 text-center text-white/50">
+          <p className="glass rounded-2xl px-6 py-16 text-center text-muted">
             {t("hero.searchPlaceholder")}
           </p>
         )}
@@ -119,8 +119,8 @@ function Chip({
       href={href}
       className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm transition ${
         active
-          ? "border-white/30 bg-white/10 text-white"
-          : "border-white/10 text-white/55 hover:border-white/25 hover:text-white"
+          ? "border-accent/35 bg-white/70 text-ink"
+          : "border-border text-muted hover:border-accent/35 hover:text-ink"
       }`}
     >
       {children}

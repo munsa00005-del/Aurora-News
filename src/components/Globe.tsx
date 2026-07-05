@@ -57,13 +57,13 @@ function GlobeMesh() {
       {/* Inner glow sphere */}
       <mesh>
         <sphereGeometry args={[1.58, 48, 48]} />
-        <meshBasicMaterial color="#0b0626" transparent opacity={0.55} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.34} />
       </mesh>
       {/* Wireframe shell */}
       <mesh>
         <sphereGeometry args={[1.6, 36, 36]} />
         <meshBasicMaterial
-          color="#7C3AED"
+          color="#5D75D8"
           wireframe
           transparent
           opacity={0.18}
@@ -73,7 +73,7 @@ function GlobeMesh() {
       <Points positions={dots} stride={3}>
         <PointMaterial
           transparent
-          color="#67e8f9"
+          color="#5D75D8"
           size={0.022}
           sizeAttenuation
           depthWrite={false}
@@ -84,7 +84,7 @@ function GlobeMesh() {
         <mesh key={i} rotation={a.rot}>
           <torusGeometry args={[1.95 + i * 0.06, 0.004, 8, 120]} />
           <meshBasicMaterial
-            color={i % 2 ? "#A855F7" : "#06B6D4"}
+            color={i % 2 ? "#DCC8FF" : "#B7C9FF"}
             transparent
             opacity={0.4}
           />
@@ -94,7 +94,7 @@ function GlobeMesh() {
       <mesh scale={1.18}>
         <sphereGeometry args={[1.6, 32, 32]} />
         <meshBasicMaterial
-          color="#7C3AED"
+          color="#B7C9FF"
           transparent
           opacity={0.06}
           side={THREE.BackSide}

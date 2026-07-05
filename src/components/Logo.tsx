@@ -70,9 +70,9 @@ export default function Logo({
         >
           <defs>
             <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48">
-              <stop stopColor="#A855F7" />
-              <stop offset="0.5" stopColor="#06B6D4" />
-              <stop offset="1" stopColor="#F59E0B" />
+              <stop stopColor="#5D75D8" />
+              <stop offset="0.5" stopColor="#7FBF9A" />
+              <stop offset="1" stopColor="#E68A4F" />
             </linearGradient>
           </defs>
           {/* core */}
@@ -108,7 +108,7 @@ export default function Logo({
             />
           </g>
           {/* orbiting electron */}
-          <circle r="2.2" fill="#F59E0B">
+          <circle r="2.2" fill="#E68A4F">
             <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
               <mpath href="#orbitPath" />
             </animateMotion>
@@ -131,7 +131,7 @@ export default function Logo({
         }`}
       >
         <span className="aurora-text">BRIEF</span>
-        <span className="font-light text-white/70">XIFY</span>
+        <span className="font-light text-muted">XIFY</span>
       </motion.span>
     </Link>
   );

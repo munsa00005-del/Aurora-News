@@ -55,7 +55,7 @@ export default function Navbar() {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "glass-strong border-b border-white/10 py-2"
+            ? "glass-strong border-b border-border py-2"
             : "border-b border-transparent py-2.5 sm:py-3"
         }`}
       >
@@ -81,11 +81,11 @@ export default function Navbar() {
             <button
               onClick={openSearch}
               aria-label={t("nav.search")}
-              className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/25 hover:text-white sm:h-auto sm:w-auto sm:gap-2 sm:px-3 sm:py-1.5 sm:text-sm"
+              className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted transition hover:border-accent/35 hover:text-ink sm:h-auto sm:w-auto sm:gap-2 sm:px-3 sm:py-1.5 sm:text-sm"
             >
               <Search className="h-4 w-4" />
               <span className="hidden sm:inline">{t("nav.search")}</span>
-              <kbd className="hidden items-center gap-0.5 rounded border border-white/15 px-1 text-[10px] text-white/40 sm:flex">
+              <kbd className="hidden items-center gap-0.5 rounded border border-border px-1 text-[10px] text-muted/70 sm:flex">
                 <Command className="h-2.5 w-2.5" />K
               </kbd>
             </button>
@@ -93,14 +93,14 @@ export default function Navbar() {
             <button
               onClick={() => setDrawer(true)}
               aria-label="Open menu"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white lg:hidden"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-card text-muted transition hover:text-ink lg:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
           </div>
         </nav>
 
-        <div className="mt-2 border-t border-white/5 lg:hidden">
+        <div className="mt-2 border-t border-border/60 lg:hidden">
           <nav
             aria-label="Mobile categories"
             className="no-scrollbar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 py-2"
@@ -111,8 +111,8 @@ export default function Navbar() {
                 href={item.href}
                 className={`relative shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                   isActive(item.href)
-                    ? "border-white/25 bg-white/10 text-white"
-                    : "border-white/10 bg-white/[0.03] text-white/62"
+                    ? "border-accent/35 bg-white/70 text-ink"
+                    : "border-border bg-white/50 text-muted"
                 }`}
                 style={
                   isActive(item.href) && item.accent
@@ -142,7 +142,7 @@ export default function Navbar() {
             <button
               aria-label="Close menu"
               onClick={() => setDrawer(false)}
-              className="absolute inset-0 bg-black/70 backdrop-blur-md"
+              className="absolute inset-0 bg-white/55 backdrop-blur-md"
             />
             <motion.aside
               initial={{ x: "100%" }}
@@ -155,7 +155,7 @@ export default function Navbar() {
                 <Logo compact />
                 <button
                   onClick={() => setDrawer(false)}
-                  className="rounded-lg p-1 text-white/50 hover:text-white"
+                  className="rounded-lg p-1 text-muted hover:text-ink"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -225,7 +225,7 @@ function NavLink({ href, label, accent: accentProp, active, index }: NavLinkProp
           }`}
           style={{ background: accent, boxShadow: `0 0 8px ${accent}` }}
         />
-        <span className={active ? "text-white" : "text-white/60 transition-colors group-hover:text-white"}>
+        <span className={active ? "text-ink" : "text-muted transition-colors group-hover:text-ink"}>
           {label}
         </span>
         {/* animated gradient underline */}
@@ -250,7 +250,7 @@ function MobileNavLink({ href, label, accent: accentProp, active, index }: NavLi
       <Link
         href={href}
         className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-4 py-2.5 text-sm transition ${
-          active ? "text-white" : "text-white/65 hover:text-white"
+          active ? "text-ink" : "text-muted hover:text-ink"
         }`}
         style={active ? { background: `${accent}1f` } : {}}
       >

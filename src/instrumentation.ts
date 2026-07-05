@@ -11,9 +11,9 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
   // Avoid double-scheduling across HMR reloads / multiple workers in dev.
-  const g = globalThis as unknown as { __orbitNewsScheduler?: boolean };
-  if (g.__orbitNewsScheduler) return;
-  g.__orbitNewsScheduler = true;
+  const g = globalThis as unknown as { __briefxifyScheduler?: boolean };
+  if (g.__briefxifyScheduler) return;
+  g.__briefxifyScheduler = true;
 
   const { syncAll, isDbEmpty, recomputeTrending } = await import("@/lib/sync");
   const { hasApiKey } = await import("@/lib/gnews");

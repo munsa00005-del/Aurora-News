@@ -35,7 +35,7 @@ export default async function Home() {
           className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24"
         >
           <ScrollReveal className="mb-10 flex flex-col items-start gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-white/60 px-3 py-1 text-xs font-medium text-muted">
               <TrendingUp className="h-3.5 w-3.5 text-amber" />
               {t("trending.badge")}
             </span>
@@ -43,7 +43,7 @@ export default async function Home() {
               {t("trending.title1")}{" "}
               <span className="text-gradient">{t("trending.title2")}</span>
             </h2>
-            <p className="max-w-xl text-white/55">{t("trending.subtitle")}</p>
+            <p className="max-w-xl text-muted">{t("trending.subtitle")}</p>
           </ScrollReveal>
 
           {items.length ? (
@@ -58,7 +58,7 @@ export default async function Home() {
               ))}
             </div>
           ) : (
-            <div className="glass rounded-2xl px-6 py-16 text-center text-white/50">
+            <div className="glass rounded-2xl px-6 py-16 text-center text-muted">
               {t("feed.empty")}
             </div>
           )}

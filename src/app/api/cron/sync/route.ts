@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { syncAll } from "@/lib/sync";
+import { summarizePending } from "@/lib/summarize";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -18,6 +19,19 @@ export async function GET(req: NextRequest) {
   if (secret && auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const summary = await syncAll();
-  return NextResponse.json(summary, { status: summary.ok ? 200 : 409 });
+  const sync = await syncAll();
+  const summarize = sync.ok
+    ? await summarizePending({
+        limit: Number(
+          process.env.CRON_SUMMARY_BATCH_SIZE ||
+            process.env.AUTO_SUMMARY_BATCH_SIZE ||
+            5
+        ),
+      })
+    : null;
+
+  return NextResponse.json(
+    { ...sync, summarize },
+    { status: sync.ok ? 200 : 409 }
+  );
 }

@@ -10,21 +10,31 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Core palette (from design spec)
-        ink: "#050505", // Deep Black
-        midnight: "#0F172A", // Midnight Blue
+        // Shared light theme palette
+        base: "#F6F7FB",
+        ink: "#182033",
+        muted: "#667085",
+        accent: "#5D75D8",
+        accent2: "#E68A4F",
+        card: "rgba(255,255,255,0.74)",
+        border: "rgba(96,112,145,0.18)",
+        blueblob: "#B7C9FF",
+        peachblob: "#FFD7AD",
+        mintblob: "#B6F0C9",
+        pinkblob: "#FFC2E3",
+        lavenderblob: "#DCC8FF",
         purple: {
-          DEFAULT: "#7C3AED", // Electric Purple
-          glow: "#A855F7", // Neon Violet
+          DEFAULT: "#8F79D8",
+          glow: "#DCC8FF",
         },
-        crimson: "#DC2626", // Deep Crimson
-        amber: "#F59E0B", // Golden Amber
-        cyan: "#06B6D4", // Neon Cyan
-        // Glass surfaces
+        crimson: "#D97A8F",
+        amber: "#E68A4F",
+        cyan: "#5D75D8",
+        green: "#7FBF9A",
         glass: {
-          DEFAULT: "rgba(255,255,255,0.04)",
-          border: "rgba(255,255,255,0.08)",
-          strong: "rgba(255,255,255,0.07)",
+          DEFAULT: "rgba(255,255,255,0.74)",
+          border: "rgba(96,112,145,0.18)",
+          strong: "rgba(255,255,255,0.88)",
         },
       },
       fontFamily: {
@@ -36,13 +46,13 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
         "aurora":
-          "linear-gradient(115deg, #7C3AED 0%, #A855F7 25%, #06B6D4 50%, #DC2626 75%, #F59E0B 100%)",
+          "linear-gradient(115deg, #5D75D8 0%, #DCC8FF 25%, #B6F0C9 50%, #FFC2E3 75%, #FFD7AD 100%)",
       },
       boxShadow: {
-        glow: "0 0 40px -10px rgba(124,58,237,0.5)",
-        "glow-cyan": "0 0 40px -10px rgba(6,182,212,0.5)",
-        "glow-amber": "0 0 40px -10px rgba(245,158,11,0.45)",
-        "card": "0 8px 40px -12px rgba(0,0,0,0.6)",
+        glow: "0 20px 70px -34px rgba(93,117,216,0.55)",
+        "glow-cyan": "0 20px 70px -34px rgba(183,201,255,0.8)",
+        "glow-amber": "0 20px 70px -34px rgba(230,138,79,0.45)",
+        "card": "0 18px 55px -34px rgba(65,78,119,0.46)",
       },
       keyframes: {
         "aurora-shift": {

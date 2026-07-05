@@ -6,21 +6,21 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
   const year = new Date().getFullYear();
   const t = makeT(lang);
   return (
-    <footer className="relative z-10 mt-24 border-t border-white/10 bg-black/40 backdrop-blur-xl">
+    <footer className="relative z-10 mt-24 border-t border-border bg-white/58 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-6 py-14">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <div className="font-display text-2xl font-bold">
               <span className="aurora-text">BRIEF</span>
-              <span className="font-light text-white/70">XIFY</span>
+              <span className="font-light text-muted">XIFY</span>
             </div>
-            <p className="mt-3 max-w-sm text-sm text-white/50">
+            <p className="mt-3 max-w-sm text-sm text-muted">
               {t("footer.tagline")}
             </p>
           </div>
 
           <div>
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted/80">
               {t("footer.categories")}
             </h4>
             <ul className="grid grid-cols-2 gap-y-2 text-sm">
@@ -28,7 +28,7 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
                 <li key={c.slug}>
                   <Link
                     href={`/category/${c.slug}`}
-                    className="text-white/60 transition hover:text-white"
+                    className="text-muted transition hover:text-ink"
                   >
                     {catLabel(lang, c.slug)}
                   </Link>
@@ -38,19 +38,19 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
           </div>
 
           <div>
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted/80">
               {t("footer.platform")}
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-white/60 transition hover:text-white">
+                <Link href="/" className="text-muted transition hover:text-ink">
                   {t("nav.home")}
                 </Link>
               </li>
               <li>
                 <Link
                   href="/search"
-                  className="text-white/60 transition hover:text-white"
+                  className="text-muted transition hover:text-ink"
                 >
                   {t("nav.search")}
                 </Link>
@@ -58,7 +58,7 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
               <li>
                 <Link
                   href="/about-us"
-                  className="text-white/60 transition hover:text-white"
+                  className="text-muted transition hover:text-ink"
                 >
                   {t("footer.about")}
                 </Link>
@@ -66,7 +66,7 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
               <li>
                 <Link
                   href="/contact-us"
-                  className="text-white/60 transition hover:text-white"
+                  className="text-muted transition hover:text-ink"
                 >
                   {t("footer.contact")}
                 </Link>
@@ -74,7 +74,7 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
               <li>
                 <Link
                   href="/privacy-policy"
-                  className="text-white/60 transition hover:text-white"
+                  className="text-muted transition hover:text-ink"
                 >
                   {t("footer.privacy")}
                 </Link>
@@ -82,19 +82,19 @@ export default function Footer({ lang = "en" }: { lang?: Lang }) {
               <li>
                 <Link
                   href="/disclaimer"
-                  className="text-white/60 transition hover:text-white"
+                  className="text-muted transition hover:text-ink"
                 >
                   {t("footer.disclaimer")}
                 </Link>
               </li>
               <li>
-                <span className="text-white/40">Powered by GNews</span>
+                <span className="text-muted/75">Powered by GNews</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted/75 sm:flex-row">
           <span>© {year} BRIEFXIFY.</span>
           <span>{t("footer.updated")}</span>
         </div>

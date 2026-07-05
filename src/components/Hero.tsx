@@ -45,9 +45,9 @@ export default function Hero() {
       </div>
 
       {/* floating glow spheres */}
-      <div className="pointer-events-none absolute left-[8%] top-[22%] h-40 w-40 animate-float-slow rounded-full bg-purple/30 blur-3xl" />
-      <div className="pointer-events-none absolute right-[10%] top-[30%] h-52 w-52 animate-float rounded-full bg-cyan/25 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[18%] left-[20%] h-32 w-32 animate-pulse-glow rounded-full bg-amber/20 blur-3xl" />
+      <div className="pointer-events-none absolute left-[8%] top-[22%] h-40 w-40 animate-float-slow rounded-full bg-lavenderblob/45 blur-3xl" />
+      <div className="pointer-events-none absolute right-[10%] top-[30%] h-52 w-52 animate-float rounded-full bg-blueblob/35 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[18%] left-[20%] h-32 w-32 animate-pulse-glow rounded-full bg-peachblob/35 blur-3xl" />
 
       <motion.div
         style={{ y, opacity, scale }}
@@ -68,7 +68,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.46, duration: 0.6 }}
-          className="mt-5 max-w-xl text-balance text-sm leading-6 text-white/60 sm:mt-6 sm:text-lg"
+          className="mt-5 max-w-xl text-balance text-sm leading-6 text-muted sm:mt-6 sm:text-lg"
         >
           {t("hero.subtitle")}
         </motion.p>
@@ -79,13 +79,13 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.6 }}
           onClick={openSearch}
-          className="group glass-strong mt-7 flex w-full max-w-lg items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition hover:border-white/25 hover:shadow-glow sm:mt-9 sm:px-5 sm:py-4"
+          className="group glass-strong mt-7 flex w-full max-w-lg items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition hover:border-accent/35 hover:shadow-glow sm:mt-9 sm:px-5 sm:py-4"
         >
-          <Search className="h-5 w-5 text-white/50 transition group-hover:text-cyan" />
-          <span className="flex-1 text-white/45">
+          <Search className="h-5 w-5 text-muted transition group-hover:text-accent" />
+          <span className="flex-1 text-muted/80">
             {t("hero.searchPlaceholder")}
           </span>
-          <kbd className="hidden rounded border border-white/15 px-2 py-0.5 text-[11px] text-white/40 sm:block">
+          <kbd className="hidden rounded border border-border px-2 py-0.5 text-[11px] text-muted/70 sm:block">
             ⌘K
           </kbd>
         </motion.button>
@@ -96,7 +96,7 @@ export default function Hero() {
         style={{ opacity }}
         className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 sm:bottom-7"
       >
-        <div className="flex flex-col items-center gap-2 text-white/40">
+        <div className="flex flex-col items-center gap-2 text-muted/70">
           <span className="text-[10px] uppercase tracking-[0.3em]">{t("hero.scroll")}</span>
           <ChevronDown className="h-5 w-5 animate-bounce" />
         </div>

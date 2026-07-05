@@ -49,10 +49,16 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: SITE_NAME },
   robots: { index: true, follow: true },
+  verification: {
+    google: "pd-WYDvJ_PlxYYrIiO5AE5JMrK8P8bK0tOMlmZ2bvtY",
+  },
+  other: {
+    "google-adsense-account": "ca-pub-2243904398120101",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050505",
+  themeColor: "#f6f7fb",
   width: "device-width",
   initialScale: 1,
 };

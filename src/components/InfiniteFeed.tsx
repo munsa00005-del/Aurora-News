@@ -60,7 +60,7 @@ export default function InfiniteFeed({
 
   if (!items.length) {
     return (
-      <div className="glass rounded-2xl px-6 py-16 text-center text-white/50">
+      <div className="glass rounded-2xl px-6 py-16 text-center text-muted">
         {emptyLabel}
       </div>
     );
@@ -81,7 +81,7 @@ export default function InfiniteFeed({
       <div ref={sentinel} className="h-12" />
 
       {done && (
-        <p className="py-10 text-center text-sm text-white/35">{endLabel}</p>
+        <p className="py-10 text-center text-sm text-muted/75">{endLabel}</p>
       )}
     </>
   );

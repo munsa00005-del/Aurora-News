@@ -7,14 +7,14 @@
 //     source and relative publish time — NO description/body (per spec)
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Article } from "@/lib/types";
 import { categoryAccent } from "@/lib/categories";
 import { catLabel } from "@/lib/i18n";
 import { useLang } from "./LangProvider";
-import { timeAgo, gradientFor } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils";
+import SafeImage from "./SafeImage";
 
 export default function NewsCard({
   article,
@@ -63,7 +63,7 @@ export default function NewsCard({
           ref={ref}
           onMouseMove={onMove}
           onMouseLeave={reset}
-          className="tilt-card group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl"
+          className="tilt-card group relative h-full overflow-hidden rounded-2xl border border-border bg-card backdrop-blur-xl hover:border-accent/25"
           style={{
             transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
           }}
@@ -78,26 +78,20 @@ export default function NewsCard({
 
           {/* thumbnail */}
           <div className="relative aspect-[16/10] overflow-hidden">
-            {article.image ? (
-              <Image
-                src={article.image}
-                alt={article.title}
-                fill
-                sizes="(max-width:768px) 100vw, 33vw"
-                priority={priority}
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            ) : (
-              <div
-                className="h-full w-full"
-                style={{ background: gradientFor(article.id) }}
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+            <SafeImage
+              src={article.image}
+              alt={article.title}
+              fallbackKey={article.id}
+              fill
+              sizes="(max-width:768px) 100vw, 33vw"
+              priority={priority}
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/10 to-transparent" />
 
             {/* category chip */}
             <span
-              className="absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md"
+              className="absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink backdrop-blur-md"
               style={{
                 borderColor: `${accent}66`,
                 background: `${accent}22`,
@@ -109,11 +103,11 @@ export default function NewsCard({
 
           {/* meta */}
           <div className="p-4">
-            <h3 className="line-clamp-3 text-[15px] font-semibold leading-snug text-white/95 transition-colors group-hover:text-white">
+            <h3 className="line-clamp-3 text-[15px] font-semibold leading-snug text-ink transition-colors group-hover:text-accent">
               {article.title}
             </h3>
-            <div className="mt-3 flex items-center justify-between text-[11px] text-white/45">
-              <span className="line-clamp-1 max-w-[60%] font-medium text-white/60">
+            <div className="mt-3 flex items-center justify-between text-[11px] text-muted/75">
+              <span className="line-clamp-1 max-w-[60%] font-medium text-muted">
                 {article.source}
               </span>
               <span>{timeAgo(article.publishedAt)}</span>
@@ -133,7 +127,7 @@ export default function NewsCard({
 
 export function NewsCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="skeleton aspect-[16/10]" />
       <div className="space-y-2 p-4">
         <div className="skeleton h-4 w-full rounded" />

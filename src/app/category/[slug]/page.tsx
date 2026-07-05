@@ -59,7 +59,7 @@ export default async function CategoryPage({
         <h1 className="font-display text-3xl font-bold tracking-tight sm:text-6xl">
           <span
             style={{
-              backgroundImage: `linear-gradient(115deg, #fff, ${cat.accent})`,
+              backgroundImage: `linear-gradient(115deg, #182033, ${cat.accent})`,
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -68,7 +68,7 @@ export default async function CategoryPage({
             {label}
           </span>
         </h1>
-        <p className="mt-3 max-w-xl text-white/55">
+        <p className="mt-3 max-w-xl text-muted">
           {t("category.subtitle", { label })}
         </p>
       </ScrollReveal>

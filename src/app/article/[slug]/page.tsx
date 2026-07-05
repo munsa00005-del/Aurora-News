@@ -1,27 +1,27 @@
 // Article detail page.
 //   • large hero image + headline + source + date + reading time
-//   • Groq-generated original report, reading progress, view tracking
+//   • Gemini-generated original report, reading progress, view tracking
 //   • related-news recommendations
 
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Clock, Eye, ArrowLeft, ExternalLink, CalendarDays } from "lucide-react";
 import { getArticleBySlug, getRelated } from "@/lib/queries";
 import { categoryAccent } from "@/lib/categories";
 import { normalizeLang, LANG_COOKIE, makeT, catLabel } from "@/lib/i18n";
-import { formatDate, readingTime, timeAgo, gradientFor } from "@/lib/utils";
+import { formatDate, readingTime, timeAgo } from "@/lib/utils";
 import { extractFullContent, isTruncated, looksLikeHtml } from "@/lib/extract";
 import {
-  looksLikeOriginalReportForLanguage,
-  rewriteArticle,
-} from "@/lib/rewrite";
+  buildLocalBrief,
+  looksLikeCompleteBriefForLanguage,
+} from "@/lib/localBrief";
 import { prisma } from "@/lib/db";
 import ReadingProgress from "@/components/ReadingProgress";
 import ViewTracker from "@/components/ViewTracker";
 import RelatedNews from "@/components/RelatedNews";
+import SafeImage from "@/components/SafeImage";
 
 export const dynamic = "force-dynamic";
 
@@ -57,18 +57,16 @@ export default async function ArticlePage({
   const uiLang = normalizeLang(cookies().get(LANG_COOKIE)?.value);
   const t = makeT(uiLang);
 
-  // Prefer an original BRIEFXIFY report generated from GNews/source metadata.
-  // It is cached in `content` so Groq is called once per article after quota
-  // is available. Older extracted HTML remains only as a fallback.
-  let contentHtml: string | null = looksLikeOriginalReportForLanguage(
+  // Prefer a complete BRIEFXIFY report and repair missing/short content locally.
+  let contentHtml: string | null = looksLikeCompleteBriefForLanguage(
     article.content,
     article.language
   )
     ? article.content
     : null;
   if (!contentHtml) {
-    const rewritten = await rewriteArticle(article);
-    if (rewritten) {
+    const rewritten = buildLocalBrief(article);
+    if (looksLikeCompleteBriefForLanguage(rewritten, article.language)) {
       contentHtml = rewritten;
       await prisma.news
         .update({ where: { id: article.id }, data: { content: rewritten } })
@@ -110,28 +108,22 @@ export default async function ArticlePage({
 
       {/* Hero image */}
       <div className="relative h-[52vh] min-h-[360px] w-full overflow-hidden">
-        {article.image ? (
-          <Image
-            src={article.image}
-            alt={article.title}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div
-            className="h-full w-full"
-            style={{ background: gradientFor(article.id) }}
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/55 to-[#050505]/20" />
+        <SafeImage
+          src={article.image}
+          alt={article.title}
+          fallbackKey={article.id}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f6f7fb] via-[#f6f7fb]/70 to-white/10" />
 
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-4xl px-4 pb-10 sm:px-6">
             <Link
               href={`/category/${article.category}`}
-              className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-md"
+              className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink backdrop-blur-md"
               style={{ borderColor: `${accent}66`, background: `${accent}22` }}
             >
               {catLabel(uiLang, article.category)}
@@ -147,13 +139,13 @@ export default async function ArticlePage({
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <Link
           href="/"
-          className="mt-6 inline-flex items-center gap-1.5 text-sm text-white/50 transition hover:text-white"
+          className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-ink"
         >
           <ArrowLeft className="h-4 w-4" /> {t("article.back")}
         </Link>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-white/10 py-4 text-sm text-white/55">
-          <span className="font-medium text-white/80">{article.source}</span>
+        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-border py-4 text-sm text-muted">
+          <span className="font-medium text-ink">{article.source}</span>
           <span className="inline-flex items-center gap-1.5">
             <CalendarDays className="h-4 w-4" /> {formatDate(article.publishedAt)}
           </span>
@@ -163,7 +155,7 @@ export default async function ArticlePage({
           <span className="inline-flex items-center gap-1.5">
             <Eye className="h-4 w-4" /> {article.views.toLocaleString()} {t("article.views")}
           </span>
-          <span className="ml-auto text-white/40">{timeAgo(article.publishedAt)}</span>
+          <span className="ml-auto text-muted/75">{timeAgo(article.publishedAt)}</span>
         </div>
 
         {contentHtml ? (
@@ -172,11 +164,11 @@ export default async function ArticlePage({
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
         ) : (
-          <div className="mt-8 space-y-5 text-lg leading-relaxed text-white/80">
+          <div className="mt-8 space-y-5 text-lg leading-relaxed text-ink/80">
             {fallbackParagraphs.length ? (
               fallbackParagraphs.map((p, i) => <p key={i}>{p}</p>)
             ) : (
-              <p className="text-white/50">
+              <p className="text-muted">
                 Full content for this story is available at the original source.
               </p>
             )}
@@ -188,7 +180,7 @@ export default async function ArticlePage({
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-10 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/30 hover:text-white"
+            className="mt-10 inline-flex items-center gap-2 rounded-full border border-border bg-white/60 px-5 py-2.5 text-sm font-medium text-muted transition hover:border-accent/35 hover:text-ink"
           >
             {t("article.viewOriginal", { source: article.source })}
             <ExternalLink className="h-4 w-4" />

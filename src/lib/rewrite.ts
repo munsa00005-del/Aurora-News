@@ -1,6 +1,6 @@
 // Article summarization.
 //
-// Priority: Groq -> null
+// Priority: Gemini -> null
 //
 // When GNews syncs articles, the content is often truncated. This module
 // rewrites each article into a BRIEFXIFY brief with source-based explanation,
@@ -9,19 +9,27 @@
 
 import sanitizeHtml from "sanitize-html";
 import type { Article } from "./types";
+import { extractFullContent, isTruncated } from "./extract";
 
-// Groq's API is OpenAI-compatible. Support the repo's existing GROK_* env names
-// plus Groq's standard GROQ_* names for deployments.
-function configuredGroqModel(): string {
-  const configured = process.env.GROQ_MODEL || process.env.GROK_MODEL;
-  if (!configured || configured.startsWith("grok-")) {
-    return "llama-3.1-8b-instant";
-  }
-  return configured;
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
+
+let geminiKeyCursor = 0;
+
+function geminiApiKeys(): string[] {
+  return (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "")
+    .split(",")
+    .map((key) => key.trim())
+    .filter(Boolean);
 }
 
-const GROQ_MODEL = configuredGroqModel();
-const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+function nextGeminiKeys(): string[] {
+  const keys = geminiApiKeys();
+  if (keys.length <= 1) return keys;
+  const start = geminiKeyCursor % keys.length;
+  geminiKeyCursor = (geminiKeyCursor + 1) % keys.length;
+  return [...keys.slice(start), ...keys.slice(0, start)];
+}
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
 
@@ -137,10 +145,23 @@ export function looksLikeOriginalReportForLanguage(
 }
 
 export function sourceTextForRewrite(article: Article): string {
+  return sourceTextForRewriteWithExtract(article);
+}
+
+function htmlToText(html: string): string {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function sourceTextForRewriteWithExtract(
+  article: Article,
+  extractedHtml?: string | null
+): string {
+  const extractedText = extractedHtml ? htmlToText(extractedHtml).slice(0, 9000) : "";
   return [
     `Title: ${article.title}`,
     `Description: ${article.description || "Not provided"}`,
     `Available content: ${stripSourceMarkers(article.content || "") || "Not provided"}`,
+    extractedText ? `Extracted original article text: ${extractedText}` : "",
     `Category: ${article.category}`,
     `Published at: ${article.publishedAt}`,
     `Original source: ${article.source}`,
@@ -154,7 +175,7 @@ export function sourceTextForRewrite(article: Article): string {
 // Designed to produce a source-attributed BRIEFXIFY explainer, not a copied
 // article. The structure gives each page more value than a plain news summary.
 
-function buildPrompt(article: Article): string {
+function buildPrompt(article: Article, extractedHtml?: string | null): string {
   const isHindi = article.language === "hi";
   const languageRules = isHindi
     ? `Language rules — follow these strictly:
@@ -216,63 +237,86 @@ Section rules:
 Output only clean Markdown. No preamble, no sign-off.
 
 Source material:
-${sourceTextForRewrite(article)}`;
+${sourceTextForRewriteWithExtract(article, extractedHtml)}`;
 }
 
-// ── Groq rewrite ───────────────────────────────────────────────────────────
+// ── Gemini rewrite ─────────────────────────────────────────────────────────
 
-async function rewriteWithGroq(article: Article): Promise<string | null> {
-  const key = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
-  if (!key) return null;
+async function rewriteWithGemini(
+  article: Article,
+  extractedHtml?: string | null
+): Promise<string | null> {
+  const keys = nextGeminiKeys();
+  if (!keys.length) return null;
 
-  try {
-    const res = await fetch(GROQ_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a careful news explainer for BRIEFXIFY. Use only the provided source facts, add useful context without inventing details, and include the required transparency note.",
-          },
-          {
-            role: "user",
-            content: buildPrompt(article),
-          },
-        ],
-        temperature: 0.6,
-        max_tokens: 2200,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error(
-        `[BRIEFXIFY] Groq rewrite failed: ${res.status} ${body.slice(0, 200)}`
+  for (const key of keys) {
+    try {
+      const res = await fetch(
+        `${GEMINI_ENDPOINT}/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${encodeURIComponent(key)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [
+                {
+                  text:
+                    "You are a careful news explainer for BRIEFXIFY. Use only the provided source facts, add useful context without inventing details, and include the required transparency note.",
+                },
+              ],
+            },
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: buildPrompt(article, extractedHtml) }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.6,
+              maxOutputTokens: 2200,
+            },
+          }),
+        }
       );
-      return null;
+
+      const data = (await res.json().catch(() => null)) as {
+        error?: { message?: string; code?: number | string; status?: string };
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      } | null;
+
+      if (!res.ok || data?.error) {
+        const status = data?.error?.status || data?.error?.code || res.status;
+        const message = data?.error?.message || res.statusText;
+        console.error(
+          `[BRIEFXIFY] Gemini rewrite failed: ${status} ${String(message).slice(0, 200)}`
+        );
+        if (
+          res.status === 429 ||
+          res.status === 503 ||
+          /RESOURCE_EXHAUSTED|UNAVAILABLE|rate|quota|limit/i.test(String(status)) ||
+          /RESOURCE_EXHAUSTED|UNAVAILABLE|rate|quota|limit/i.test(String(message))
+        ) {
+          continue;
+        }
+        continue;
+      }
+
+      const markdown = data?.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || "")
+        .join("")
+        .trim();
+      if (!markdown || markdown.length < 400) continue;
+
+      console.log(
+        `[BRIEFXIFY] Gemini summarized: "${article.title.slice(0, 60)}..." (${markdown.length} chars)`
+      );
+      return markdownToSafeHtml(markdown);
+    } catch (e) {
+      console.error("[BRIEFXIFY] Gemini rewrite error:", e);
     }
-
-    const data = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-
-    const markdown = data.choices?.[0]?.message?.content?.trim();
-    if (!markdown || markdown.length < 400) return null;
-
-    console.log(
-      `[BRIEFXIFY] Groq summarized: "${article.title.slice(0, 60)}..." (${markdown.length} chars)`
-    );
-    return markdownToSafeHtml(markdown);
-  } catch (e) {
-    console.error("[BRIEFXIFY] Groq rewrite error:", e);
-    return null;
   }
+
+  return null;
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -280,5 +324,9 @@ async function rewriteWithGroq(article: Article): Promise<string | null> {
 export async function rewriteArticle(
   article: Article
 ): Promise<string | null> {
-  return rewriteWithGroq(article);
+  const extractedHtml =
+    article.url && isTruncated(article.content)
+      ? await extractFullContent(article.url)
+      : null;
+  return rewriteWithGemini(article, extractedHtml);
 }

@@ -1,2 +1,2 @@
-// Quick wrapper: runs the grok summarize script
-import("./grok-summarize-all.mjs");
+// Quick wrapper: runs the Gemini summarize script.
+import("./gemini-summarize-all.mjs");

@@ -36,8 +36,11 @@ npm run dev                 # auto-starts Postgres + pushes schema
 npm run sync                # (optional) pull real articles right now
 ```
 
-Set `GROQ_API_KEY` to enable BRIEFXIFY' on-page original report rewrite for
-articles. The app caches each generated report in the article content field.
+Set `GEMINI_API_KEYS` to enable BRIEFXIFY's on-page original report rewrite for
+articles. Multiple comma-separated Gemini keys are rotated automatically. New
+GNews articles are summarized during sync automatically, and any older
+unsummarized articles are cleared by the `/api/cron/summarize` scheduled job.
+The app caches each generated report in the article content field.
 
 Open http://localhost:3000.
 
@@ -63,8 +66,9 @@ Add these **Environment Variables** in the Vercel project settings:
 | --- | --- |
 | `DATABASE_URL` | your Neon/Supabase connection string |
 | `GNEWS_API_KEY` | your GNews key |
-| `GROQ_API_KEY` | your Groq API key |
-| `GROQ_MODEL` | `llama-3.1-8b-instant` |
+| `GEMINI_API_KEYS` | comma-separated Gemini API keys |
+| `GEMINI_MODEL` | `gemini-2.5-flash-lite` |
+| `AUTO_SUMMARY_BATCH_SIZE` | `5` |
 | `CRON_SECRET` | a long random string |
 | `AUTH_SECRET` | a long random string |
 | `NEXT_PUBLIC_SITE_URL` | your `https://<project>.vercel.app` URL |

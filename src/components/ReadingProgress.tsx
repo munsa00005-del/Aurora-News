@@ -15,7 +15,7 @@ export default function ReadingProgress() {
   return (
     <motion.div
       style={{ scaleX }}
-      className="fixed inset-x-0 top-0 z-[60] h-1 origin-left bg-gradient-to-r from-purple via-cyan to-amber shadow-glow"
+      className="fixed inset-x-0 top-0 z-[60] h-1 origin-left bg-gradient-to-r from-accent via-mintblob to-accent2 shadow-glow"
     />
   );
 }
