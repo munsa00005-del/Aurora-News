@@ -7,7 +7,7 @@
 //     source and relative publish time — NO description/body (per spec)
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import type { Article } from "@/lib/types";
 import { categoryAccent } from "@/lib/categories";
@@ -26,25 +26,37 @@ export default function NewsCard({
   priority?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 50 });
+  const glowRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
   const accent = categoryAccent(article.category);
   const { lang } = useLang();
 
+  // Tilt is written straight to the DOM (no React state) so moving the mouse
+  // never triggers a re-render — critical when 18+ cards are on screen. Updates
+  // are throttled to one per animation frame. Disabled on touch / small screens.
   function onMove(e: React.MouseEvent) {
     const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width;
-    const py = (e.clientY - r.top) / r.height;
-    setTilt({
-      rx: (0.5 - py) * 8,
-      ry: (px - 0.5) * 10,
-      gx: px * 100,
-      gy: py * 100,
+    if (!el || rafRef.current != null) return;
+    const cx = e.clientX;
+    const cy = e.clientY;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const r = el.getBoundingClientRect();
+      const px = (cx - r.left) / r.width;
+      const py = (cy - r.top) / r.height;
+      el.style.transform = `perspective(900px) rotateX(${(0.5 - py) * 8}deg) rotateY(${(px - 0.5) * 10}deg)`;
+      if (glowRef.current) {
+        glowRef.current.style.background = `radial-gradient(380px circle at ${px * 100}% ${py * 100}%, ${accent}22, transparent 60%)`;
+      }
     });
   }
   function reset() {
-    setTilt({ rx: 0, ry: 0, gx: 50, gy: 50 });
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    const el = ref.current;
+    if (el) el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
   }
 
   return (
@@ -63,17 +75,13 @@ export default function NewsCard({
           ref={ref}
           onMouseMove={onMove}
           onMouseLeave={reset}
-          className="tilt-card group relative h-full overflow-hidden rounded-2xl border border-border bg-card backdrop-blur-xl hover:border-accent/25"
-          style={{
-            transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
-          }}
+          className="tilt-card group relative h-full overflow-hidden rounded-2xl border border-border bg-card hover:border-accent/25"
+          style={{ transform: "perspective(900px) rotateX(0deg) rotateY(0deg)" }}
         >
           {/* cursor glow */}
           <div
+            ref={glowRef}
             className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            style={{
-              background: `radial-gradient(380px circle at ${tilt.gx}% ${tilt.gy}%, ${accent}22, transparent 60%)`,
-            }}
           />
 
           {/* thumbnail */}

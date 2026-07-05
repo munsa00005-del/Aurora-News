@@ -61,10 +61,17 @@ export default function AuroraBackground() {
     const target = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     const current = { x: target.x, y: target.y };
     let raf = 0;
+    let running = false;
 
     function onMouseMove(event: MouseEvent) {
       target.x = event.clientX;
       target.y = event.clientY;
+      // Wake the loop only when the pointer actually moves; the CSS keyframe
+      // animations handle the ambient motion, so we don't burn frames idle.
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
     }
 
     function frame() {
@@ -91,10 +98,17 @@ export default function AuroraBackground() {
         particlesRef.current.style.transform = `translate3d(${fromCenterX * -0.006}px, ${fromCenterY * -0.006}px, 0)`;
       }
 
+      // Stop once the eased position has essentially caught up — saves a
+      // constant 60fps loop when the pointer is still.
+      if (Math.abs(target.x - current.x) < 0.4 && Math.abs(target.y - current.y) < 0.4) {
+        running = false;
+        return;
+      }
       raf = requestAnimationFrame(frame);
     }
 
     window.addEventListener("mousemove", onMouseMove, { passive: true });
+    running = true;
     raf = requestAnimationFrame(frame);
 
     return () => {
